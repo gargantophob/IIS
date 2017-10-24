@@ -319,12 +319,15 @@ class Meeting {
 	public $alcoholic;
 	/** Patron email. */
 	public $patron;
+	/** Meeting date. */
+	public $date;
 	
 	/** Construct a meeting. */
-	public function __construct($id, $alcoholic, $patron) {
+	public function __construct($id, $alcoholic, $patron, $date) {
 		$this->id = $id;
 		$this->alcoholic = $alcoholic;
 		$this->patron = $patron;
+		$this->date = $date;
 	}
 	
 	/** Register a new meeting in a database. */
@@ -334,29 +337,45 @@ class Meeting {
 			array(
 				// id is auto-incremented
 				"alcoholic"	=>	"'$this->alcoholic'",
-				"patron"	=>	"'$this->patron'"
+				"patron"	=>	"'$this->patron'",
+				"date"		=>	"'$this->date'"
 			)
 		);
 	}
 	
 	/** Look meeting up.
 	 * @param id meetind identifier
+	 * @return an instance of a Meeting class or null on failed search
 	 */
 	public static function meeting($id) {
 		// Look meeting up
 		$data = db_select("SELECT * FROM meeting WHERE id=$id");
 		if($data == null) {
 			// Meeting does not exist
+			return null;
 		}
 		
 		// Instantiate
 		$data = db_next($data);
-		return new Meeting($id, $data["alcoholic"], $data["patron"]);
+		return new Meeting(
+			$id, $data["alcoholic"], $data["patron"], $data["date"]
+		);
 	}
 	
-	/** TODO */
-	public static function meetings($email) {
-		
+	/** Look up all meetings of a person. 
+	 * @param email person to look up
+	 * @param role role of a person ("alcoholic" or "patron")
+	 * @return array of instances of a Meeting class (might be empty)
+	 */
+	public static function meetings($email, $role) {
+		$data = db_select("SELECT * FROM meeting WHERE $role='$email'");
+		$meetings = array();
+		if($data != null) {
+			while($row = db_next($data)) {
+				array_push($meetins, $row["id"]);
+			}
+		}
+		return $meetings;
 	}
 }
 ?>

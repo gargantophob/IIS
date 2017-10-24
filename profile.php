@@ -15,11 +15,6 @@ restrict_page_access();
 // Initialize the page
 $page = new Page();
 
-/**/
-$m = new Meeting(0, "asdf", "asdf");
-$m->insert();
-/**/
-
 // Read source (session) and target
 $source = person($_SESSION["user"]);
 $target = $source;	// default target is the source
@@ -137,6 +132,10 @@ if($target == $source) {
 	}
 }
 $page->add($form);
+$page->newline();
+
+// All members page
+$page->add(new Link("members.php", "All members of Anonymous Alcoholics"));
 $page->newline();
 
 // Render the page
