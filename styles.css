@@ -1,0 +1,40 @@
+body {
+    background-color: silver;
+}
+
+label {
+    font-weight: bold;
+    float: left;
+//    width: 9em;
+}
+
+p {
+    text-align: center;
+    color: red;
+}
+
+/* stuff with menu bars */
+#menubar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #444444;
+}
+
+#menubar li {
+    float: left;
+}
+
+#menubar li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 18px;
+    text-decoration: none;
+}
+
+#menubar li a:hover {
+    background-color: #111111;
+    color: yellow;
+}
