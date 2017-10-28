@@ -12,6 +12,12 @@ p {
     color: red;
 }
 
+/* simple table */
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
 /* stuff with menu bars */
 #menubar {
     list-style-type: none;

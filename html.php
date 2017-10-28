@@ -9,12 +9,38 @@
 /** HTML primitive. */
 abstract class Primitive {
     protected $id;
+    protected $class;
     public function set_id($newid) {
-        $id = $newid;
+        $this->id = $newid;
     }
+
     public function get_id() {
         return $id;
     }
+
+    public function set_class($newclass) {
+        $this->class = $newclass;
+    }
+
+    public function get_class() {
+        return $class;
+    }
+
+    /** returns id in html format if any */
+    protected function id_html() {
+        $ret = '';
+
+        if ($this->id != null) {
+            $ret .= ' id="' . $this->id . '" ';
+        }
+
+        if ($this->class != null) {
+            $ret .= ' class="' . $this->class . '" ';
+        }
+
+        return $ret;
+    }
+
     /** Get html representation of a primitive. */
     abstract public function html();
 }
@@ -84,6 +110,29 @@ class Page extends Primitive {
 
 /****************************** PRIMITIVES ******************************/
 
+class Block extends Primitive {
+    private $childs;
+
+    public function __construct() {
+        // XXX inline ?
+        $this->childs = array();
+    }
+
+    public function add($primitive) {
+        array_push($this->childs, $primitive);
+    }
+
+    public function html() {
+        $ret = '<div ' . $this->id_html() . '>';
+        foreach ($this->childs as $primitive) {
+            $ret .= $primitive->html();
+        }
+        $ret .= '</div>';
+        return $ret;
+    }
+}
+
+
 /** Line break. */
 class CRLF extends Primitive {
     /** html() implementation. */
@@ -123,7 +172,7 @@ class Link extends Primitive {
 
     /** html() implementation. */
     public function html() {
-        return "<a href='$this->url'>$this->description</a>";
+        return "<a " . $this->id_html() . "href='$this->url'>$this->description</a>";
     }
 }
 
@@ -169,8 +218,7 @@ class Input extends Primitive {
 
     /** html() implementation. */
     public function html() {
-        $str = "";
-
+        $str = '';
         // Add label (if exists)
         if(isset($this->label)) {
             $str .= "<label for='$this->name'>$this->label</label>";
@@ -178,10 +226,11 @@ class Input extends Primitive {
 
         // Open tag, append attributes, close tag
         $str .= "<input type='$this->type' name='$this->name' ";
+        $str .= $this->id_html();
         foreach($this->attributes as $attribute => $value) {
             $str .= " $attribute='$value' ";
         }
-        $str .= "/>";
+        $str .=  "/>";
 
         // Success
         return $str;
@@ -218,8 +267,8 @@ class Select extends Input {
 
     /** html() implementation. */
     public function html() {
-        $str = "";
 
+        $str = "";
         // Add label (if exists)
         if(isset($this->label)) {
             $str .= "<label for='$this->name'>$this->label</label>";
@@ -227,6 +276,7 @@ class Select extends Input {
 
         // Open tag, append attributes, close tag
         $str .= "<select name='$this->name' ";
+        $str .= $this->id_html();
         foreach($this->attributes as $attribute => $value) {
             $str .= " $attribute='$value' ";
         }
