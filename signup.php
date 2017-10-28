@@ -32,7 +32,7 @@ if(isset($_SESSION["user"])) {
 function to_block($element, $classname = null) {
     $block = new Block();
     if ($classname != null) {
-        $block->set_class($classname);
+        $block->set("class", $classname);
     }
     $block->add($element);
     return $block;
@@ -186,7 +186,7 @@ $form->set("enctype", "multipart/form-data");
 $input = new Input("text", "name", "Name:");
 $input->set("maxlength", "128");
 $input->set("value", $name);
-$form->add(to_block($input));
+$form->add($input);
 
 // Email
 $input = new Input("text", "email", "Email:");
@@ -195,22 +195,22 @@ $input->set("value", $email);
 if($authorized) {
 	$input->set("disabled", "true");
 }
-$form->add(to_block($input));
+$form->add($input);
 
 // Password
 $input = new Input("password", "password1", "Password:");
 $input->set("maxlength", "128");
-$form->add(to_block($input));
+$form->add($input);
 
 // Password again
 $input = new Input("password", "password2", "Password again:");
 $input->set("maxlength", "128");
-$form->add(to_block($input));
+$form->add($input);
 
 // Birthdate
 $input = new Input("text", "birthdate", "Birthdate (yyyy-mm-dd):");
 $input->set("value", $birthdate);
-$form->add(to_block($input));
+$form->add($input);
 
 // Gender: male
 $input = new Input("radio", "gender", "Male");
@@ -218,7 +218,7 @@ $input->set("value", "M");
 if($gender == "M") {
 	$input->set("checked", "true");
 }
-$form->add(to_block($input));
+$form->add($input);
 
 // Gender: female
 $input = new Input("radio", "gender", "Female");
@@ -226,20 +226,20 @@ $input->set("value", "F");
 if($gender == "F") {
 	$input->set("checked", "true");
 }
-$form->add(to_block($input));
+$form->add($input);
 
 // Profile picture
 $input = new Input("file", "file", "Select your profile picture:");
-$form->add(to_block($input));
+$form->add($input);
 
 // education field for an expert
 // XXX perhaps different field
-$edufield = new Input("text", "education", "education");
-$form->add(to_block($edufield, "expert_field"));
+$block = to_block(new Input("text", "education", "education"), "expert_field");
+$form->add($block);
 
 // Role select
 $input = new Select("role", "Your role:");
-$input->set_id("select_role");        // ID set
+$input->set("id", "select_role");        // ID set
 $input->add_option("alcoholic", "Alcoholic");
 $input->add_option("patron", "Patron");
 $input->add_option("expert", "Expert");
@@ -247,12 +247,12 @@ $input->select($role);
 if($authorized) {
 	$input->set("disabled", "true");
 }
-$form->add(to_block($input));
+$form->add($input);
 
 // Submit
 $input = new Input("submit", "submit");
 $input->set("value", "Submit");
-$form->add(to_block($input));
+$form->add($input);
 
 // Error message
 $form->add_error($error);

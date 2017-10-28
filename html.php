@@ -8,37 +8,26 @@
 
 /** HTML primitive. */
 abstract class Primitive {
-    protected $id;
-    protected $class;
-    public function set_id($newid) {
-        $this->id = $newid;
+    protected $attributes;
+
+    public function set($attribute, $value) {
+        $this->attributes[$attribute] = $value;
     }
 
-    public function get_id() {
-        return $id;
+    public function get($attribute, $value) {
+        $this->attributes[$attribute] = $value;
     }
 
-    public function set_class($newclass) {
-        $this->class = $newclass;
-    }
-
-    public function get_class() {
-        return $class;
-    }
-
-    /** returns id in html format if any */
-    protected function id_html() {
-        $ret = '';
-
-        if ($this->id != null) {
-            $ret .= ' id="' . $this->id . '" ';
+    protected function attr_html() {
+        $str = " ";
+        foreach($this->attributes as $attribute => $value) {
+            $str .= " $attribute='$value' ";
         }
+        return $str;
+    }
 
-        if ($this->class != null) {
-            $ret .= ' class="' . $this->class . '" ';
-        }
-
-        return $ret;
+    public function __construct() {
+        $this->attributes = array();
     }
 
     /** Get html representation of a primitive. */
@@ -48,7 +37,7 @@ abstract class Primitive {
 
 
 /** HTML page. {{{*/
-class Page extends Primitive {
+class Page {
     /** menubar element */
     static private $menu =
     '<ul id="menubar">
@@ -114,7 +103,8 @@ class Block extends Primitive {
     private $childs;
 
     public function __construct() {
-        // XXX inline ?
+        // XXX inline (span)?
+        parent::__construct();
         $this->childs = array();
     }
 
@@ -123,7 +113,7 @@ class Block extends Primitive {
     }
 
     public function html() {
-        $ret = '<div ' . $this->id_html() . '>';
+        $ret = '<div ' . $this->attr_html() . '>';
         foreach ($this->childs as $primitive) {
             $ret .= $primitive->html();
         }
@@ -148,6 +138,7 @@ class Text extends Primitive {
 
     /** Construct a text block. */
     public function __construct($data) {
+        parent::__construct();
         $this->data = $data;
     }
 
@@ -166,13 +157,15 @@ class Link extends Primitive {
 
     /** Create a hyperlink. */
     public function __construct($url, $description) {
+        parent::__construct();
         $this->url = $url;
         $this->description = $description;
     }
 
     /** html() implementation. */
     public function html() {
-        return "<a " . $this->id_html() . "href='$this->url'>$this->description</a>";
+        return "<a " . $this->attr_html() .
+               " href='$this->url'>$this->description</a>";
     }
 }
 
@@ -183,6 +176,7 @@ class Image extends Primitive {
 
     /** Create an image. */
     public function __construct($source) {
+        parent::__construct();
         $this->source = $source;
     }
 
@@ -205,15 +199,10 @@ class Input extends Primitive {
 
     /** Construct a form input. */
     public function __construct($type, $name, $label = null) {
+        parent::__construct();
         $this->type = $type;
         $this->name = $name;
         $this->label = $label;
-        $this->attributes = array();
-    }
-
-    /** Set element attribute. */
-    public function set($attribute, $value) {
-        $this->attributes[$attribute] = $value;
     }
 
     /** html() implementation. */
@@ -226,10 +215,7 @@ class Input extends Primitive {
 
         // Open tag, append attributes, close tag
         $str .= "<input type='$this->type' name='$this->name' ";
-        $str .= $this->id_html();
-        foreach($this->attributes as $attribute => $value) {
-            $str .= " $attribute='$value' ";
-        }
+        $str .= $this->attr_html();
         $str .=  "/>";
 
         // Success
@@ -276,10 +262,7 @@ class Select extends Input {
 
         // Open tag, append attributes, close tag
         $str .= "<select name='$this->name' ";
-        $str .= $this->id_html();
-        foreach($this->attributes as $attribute => $value) {
-            $str .= " $attribute='$value' ";
-        }
+        $str .= $this->attr_html();
         $str .= ">";
 
         // Append options, close element
@@ -301,15 +284,14 @@ class Select extends Input {
 class Form extends Primitive {
     /** A collection of form inputs. */
     private $inputs;
-    /** Form attributes (optional). */
-    private $attributes;
+
     /** Error message (optional). */
     private $error;
 
     /** Create a form. */
     public function __construct() {
+        parent::__construct();
         $this->inputs = array();
-        $this->attributes = array();
         $this->error = null;
     }
 
@@ -318,11 +300,6 @@ class Form extends Primitive {
      */
     public function add($input) {
         array_push($this->inputs, $input);
-    }
-
-    /** Set attribute value. */
-    public function set($attribute, $value) {
-        $this->attributes[$attribute] = $value;
     }
 
     /** Register error message. */
@@ -334,9 +311,7 @@ class Form extends Primitive {
     public function html() {
         // Open tag, append attributes, close the tag
         $str = "<form method='post'";
-        foreach($this->attributes as $attribute => $value) {
-            $str .= " $attribute='$value' ";
-        }
+        $str .= $this->attr_html();
         $str .= ">";
 
         // Append form inputs, close element
@@ -366,6 +341,7 @@ class Table extends Primitive {
      * @param header table header
      */
     public function __construct($header) {
+        parent::__construct();
         $this->header = $header;
         $this->rows = array();
     }
