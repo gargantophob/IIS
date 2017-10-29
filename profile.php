@@ -105,9 +105,9 @@ if($target->role() == "alcoholic") {
 // List meetings
 if($source == $target && $source->role() != "expert") {
 	$meetings = $source->meetings();
-	$table = new Table(array(new Text("My meetings:")));
+	$table = new Table(array(new Text("Your meetings:")));
 	foreach($meetings as $meeting) {
-		$meeting = Meeting::meeting($meeting); // ?!
+		$meeting = Meeting::look_up($meeting); // ?!
 		$person = $source->role() == "alcoholic" ? $meeting->patron : $meeting->alcoholic;
 		$link = new Link("profile.php?target=$person", person($person)->name);
 		$date = new Text($meeting->date);

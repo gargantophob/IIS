@@ -168,8 +168,8 @@ class Alcoholic extends Person {
 	}
 	
 	/** Meet a patron. */
-	public function meet($patron, $date) {
-		$meeting = new Meeting(-1, $this->email, $patron, $date);
+	public function meet($email, $date) {
+		$meeting = new Meeting(-1, $this->email, $email, $date);
 		$meeting->insert();
 	}
 }
@@ -234,8 +234,8 @@ class Patron extends Person {
 	}
 	
 	/** Meet an alcoholic. */
-	public function meet($alcoholic, $date) {
-		$meeting = new Meeting(-1, $alcoholic, $this->email, $date);
+	public function meet($email, $date) {
+		$meeting = new Meeting(-1, $email, $this->email, $date);
 		$meeting->insert();
 	}
 }
@@ -366,11 +366,10 @@ class Meeting {
 		);
 	}
 	
-	/** Look meeting up.
-	 * @param id meetind identifier
+	/** Look meeting up by identifier.
 	 * @return an instance of a Meeting class or null on failed search
 	 */
-	public static function meeting($id) {
+	public static function look_up($id) {
 		// Look meeting up
 		$data = db_select("SELECT * FROM meeting WHERE id=$id");
 		if($data == null) {
@@ -379,16 +378,16 @@ class Meeting {
 		}
 		
 		// Instantiate
-		$data = db_next($data);
+		$meeting = db_next($data);
 		return new Meeting(
-			$id, $data["alcoholic"], $data["patron"], $data["date"]
+			$id, $meeting["alcoholic"], $meeting["patron"], $meeting["date"]
 		);
 	}
 	
 	/** Look up all meetings of a person. 
 	 * @param email person to look up
 	 * @param role role of a person ("alcoholic" or "patron")
-	 * @return array of instances of a Meeting class (might be empty)
+	 * @return array of meeting identifiers (might be empty)
 	 */
 	public static function meetings_of($email, $role) {
 		$data = db_select("SELECT * FROM meeting WHERE $role='$email'");
