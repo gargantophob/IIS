@@ -372,4 +372,118 @@ class Meeting {
 		return $meetings;
 	}
 }
+
+/** Place data. */
+class Place {
+	/** Place identifier. */
+	public $id;
+	/** Address. */
+	public $address;
+	
+	/** Construct a place. */
+	public function __construct($id, $address) {
+		$this->id = $id;
+		$this->address = $address;
+	}
+	
+	/** Register a new meeting in a database. */
+	public function insert() {
+		db_insert("place", array("address" => "'$this->address'"));
+	}
+	
+	/** Look place up by identifier.
+	 * @return an instance of a Place class or null on failed search
+	 */
+	public static function look_up($id) {
+		// Look place up
+		$data = db_select("SELECT * FROM place WHERE id=$id");
+		if($data == null) {
+			// Meeting does not exist
+			return null;
+		}
+		
+		// Instantiate
+		$place = db_next($data);
+		return new Place($id, $place["address"]);
+	}
+	
+	/** Look up all places.
+	 * @return array of place identifiers (might be empty)
+	 */
+	public static function all() {
+		$places = array();
+		$data = db_select("SELECT id FROM place");	
+		if($data != null) {
+			while($row = db_next($data)) {
+				array_push($places, $row["id"]);
+			}
+		}
+		return $places;
+	}
+}
+
+/** Session data. */
+class Session {
+	/** Session identifier. */
+	public $id;
+	/** Date. */
+	public $date;
+	/** Place identifier. */
+	public $place;
+	/** Session leader (email). */
+	public $leader;
+	
+	/** Construct a session. */
+	public function __construct($id, $date, $place, $leader) {
+		$this->id = $id;
+		$this->date = $date;
+		$this->place = $place;
+		$this->leader = $leader;
+	}
+	
+	/** Register a new session in a database. */
+	public function insert() {
+		$res = db_insert(
+			"session",
+			array(
+				"date"		=> "'$this->date'",
+				"place"		=> "$this->place",
+				"leader"	=> "'$this->leader'"
+			)
+		);
+	}
+	
+	/** Look session up by identifier.
+	 * @return an instance of a Session class or null on failed search
+	 */
+	public static function look_up($id) {
+		// Look session up
+		$data = db_select("SELECT * FROM session WHERE id=$id");
+		if($data == null) {
+			// Session does not exist
+			return null;
+		}
+		
+		// Instantiate
+		$session = db_next($data);
+		return new Session(
+			$id, $session["date"], $session["place"], $session["leader"]
+		);
+	}
+	
+	/** Look up all sessions.
+	 * @return array of place identifiers (might be empty)
+	 */
+	public static function all() {
+		$sessions = array();
+		$data = db_select("SELECT id FROM session");	
+		if($data != null) {
+			while($row = db_next($data)) {
+				array_push($sessions, $row["id"]);
+			}
+		}
+		return $sessions;
+	}
+}
+
 ?>

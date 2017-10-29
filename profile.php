@@ -206,6 +206,10 @@ $page->newline();
 $page->add(new Link("members.php", "All members of Anonymous Alcoholics"));
 $page->newline();
 
+// All sessions page
+$page->add(new Link("sessions.php", "All sessions"));
+$page->newline();
+
 // Render the page
 $page->render();
 
@@ -216,13 +220,13 @@ var meet = document.getElementById("meet");
 meet.onclick = function() {
 	var name = document.getElementById("name").value;
 	var email = document.getElementById("target").value;
-	var success = false;
 	var dateStr;
 	while(true) {
 		dateStr = prompt(
 			"When would you like to meet " + name + "? (yyyy-mm-dd)", ""
 		);
 		if(dateStr == null) {
+			// Cancel
 			break;
 		}
 		var date = new Date(dateStr);
@@ -230,15 +234,11 @@ meet.onclick = function() {
 		var month = eval(date.getMonth())+1;
 		var day = date.getDate();
 		if(!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-			success = true;
-			break;
+			// Success
+			window.location.replace(
+				"profile.php?target=" + email + "&date=" + dateStr
+			);
 		}
-	}
-	
-	if(success) {
-		window.location.replace(
-			"profile.php?target=" + email + "&date=" + dateStr
-		);
 	}
 }
 </script>

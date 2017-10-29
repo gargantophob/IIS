@@ -22,7 +22,7 @@ $table->add(array(new Text("Person"), new Text("Type")));
 foreach($emails as $email) {
 	$person = Person::look_up($email);
 	$name = new Link("profile.php?target=$email", $person->name);
-	$role = new Text($person->role());
+	$role = new Text($person->role);
 	$table->add(array($name, $role));
 }
 $page->add($table);

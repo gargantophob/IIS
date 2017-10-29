@@ -78,7 +78,7 @@ function form_process() {
 
 	if(!$authorized) {
 		// Check email uniqueness
-		if(person($email) != null) {
+		if(Person::look_up($email) != null) {
 			$error = "User with this email already exists.";
 			return FALSE;
 		}
@@ -101,12 +101,12 @@ function form_process() {
 
 	// Check birthdate
 	if($birthdate != "") {
-		$birthdate = DateTime::createFromFormat("Y-m-d", $birthdate);
-		if($birthdate === FALSE) {
+		$date = DateTime::createFromFormat("Y-m-d", $birthdate);
+		if($date === FALSE) {
 			$error = "Wrong date format.";
 			return FALSE;
 		}
-		$birthdate = $birthdate->format("Y-m-d");
+		$birthdate = $date->format("Y-m-d");
 	}
 
 	// Check filename
