@@ -38,7 +38,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET") {
 		$target = Person::look_up($_GET["target"]);
 	}
 	if(isset($_GET["date"])) {
-		// Meet target
+		// Meet  the target
 		$source->meet($target->email, $_GET["date"]);
 		redirect("profile.php?target=$target->email");
 	}
@@ -49,6 +49,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	// Extract hidden target
 	$target = Person::look_up($_POST["target"]);
 	
+	// Differentiate buttons
 	if(isset($_POST["log_out"])) {
 		// Log out
 		session_unset();
@@ -62,14 +63,24 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	if(isset($_POST["support_start"])) {
 		// Start supporting
 		$source->support($target->email);
-		redirect("profile.php?target=$target->email");
 	}
 	if(isset($_POST["support_stop"])) {
 		// Stop supporting
 		$source->drop($target->email);
-		redirect("profile.php?target=$target->email");
 	}
 }
+
+// Log out button
+$form = new Form();
+
+// Log out button
+$input = new Input("submit", "log_out");
+$input->set("value", "Log out");
+$form->add($input);
+
+// Form complete
+$page->add($form);
+$page->newline();
 
 // Preprocess some target data
 $birthdate = $target->birthdate;
@@ -109,12 +120,12 @@ if($source == $target) {
 // Print specific data
 if($target->role == "alcoholic") {
 	// Patrons
-	$page->add(list_of_people("$pa patrons:", $target->list_patrons()));
+	$page->add(list_of_people("$pa patrons:", $target->patrons()));
 	// Experts
-	$page->add(list_of_people("$pa experts:", $target->list_experts()));
+	$page->add(list_of_people("$pa experts:", $target->experts()));
 } else {
 	// Alcoholics
-	$page->add(list_of_people("$pa alcoholics:", $target->list_alcoholics()));
+	$page->add(list_of_people("$pa alcoholics:", $target->alcoholics()));
 }
 
 // List meetings
@@ -122,7 +133,7 @@ if($source == $target && $source->role != "expert") {
 	$meetings = $source->meetings();
 	$table = new Table(array(new Text("Your meetings:")));
 	foreach($meetings as $meeting) {
-		$meeting = Meeting::look_up($meeting); // ?!
+		$meeting = Meeting::look_up($meeting);
 		$person = $source->role == "alcoholic" ? $meeting->patron : $meeting->alcoholic;
 		$link = new Link(
 			"profile.php?target=$person", Person::look_up($person)->name
@@ -132,7 +143,7 @@ if($source == $target && $source->role != "expert") {
 	}
 	$page->add($table);	
 }
-	
+
 // A bunch of buttons
 $form = new Form();
 
@@ -143,29 +154,23 @@ $input->set("value", $target->email);
 $input->set("hidden", "true");
 $form->add($input);
 
-// Log out button
-$input = new Input("submit", "log_out");
-$input->set("value", "Log out");
+// Hidden name parameter for JS
+$input = new Input("text", "name");
+$input->set("id", "name");
+$input->set("value", $target->name);
+$input->set("hidden", "true");
 $form->add($input);
 
+// Buttons
 if($target == $source) {
 	// Edit profile button
 	$input = new Input("submit", "edit");
 	$input->set("value", "Edit profile");
 	$form->add($input);
 } else {
-	if(
-		($source->role == "alcoholic" && array_search($target->email, $source->list_patrons()) !== FALSE)
-		|| ($source->role == "patron" && array_search($target->email, $source->list_alcoholics()) !== FALSE)
-	) {
-		// Create an appointment button
-		$input = new Input("button", "meet");
-		$input->set("id", "meet");
-		$input->set("value", "Meet him");
-		$form->add($input);
-	}
+	// Support start/drop buttons
 	if($source->role != "alcoholic" && $target->role == "alcoholic") {
-		if(array_search($target->email, $source->list_alcoholics()) !== FALSE) {
+		if(array_search($target->email, $source->alcoholics()) !== FALSE) {
 			// Support stop button
 			$input = new Input("submit", "support_stop");
 			$input->set("value", "Stop supporting");
@@ -176,6 +181,22 @@ if($target == $source) {
 			$input->set("value", "Start supporting");
 			$form->add($input);
 		}
+	}
+	
+	// Create an appointment button
+	if(
+		(
+			$source->role == "alcoholic"
+			&& array_search($target->email, $source->patrons()) !== FALSE
+		) || (
+			$source->role == "patron"
+			&& array_search($target->email, $source->alcoholics()) !== FALSE
+		)
+	) {
+		$input = new Input("button", "meet");
+		$input->set("id", "meet");
+		$input->set("value", "Meet");
+		$form->add($input);
 	}
 }
 $page->add($form);
@@ -193,11 +214,14 @@ $page->render();
 <script>
 var meet = document.getElementById("meet");
 meet.onclick = function() {
-	var target = document.getElementById("target").value;
+	var name = document.getElementById("name").value;
+	var email = document.getElementById("target").value;
 	var success = false;
 	var dateStr;
 	while(true) {
-		dateStr = prompt("When would you like to meet? (yyyy-mm-dd)", "");
+		dateStr = prompt(
+			"When would you like to meet " + name + "? (yyyy-mm-dd)", ""
+		);
 		if(dateStr == null) {
 			break;
 		}
@@ -212,7 +236,9 @@ meet.onclick = function() {
 	}
 	
 	if(success) {
-		window.location.replace("profile.php?target=" + target + "&date=" + dateStr);
+		window.location.replace(
+			"profile.php?target=" + email + "&date=" + dateStr
+		);
 	}
 }
 </script>

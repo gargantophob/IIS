@@ -96,28 +96,29 @@ class Person {
 		return $people;
 	}
 	
-	/** Look person up and fill the attributes.
-	 * @param email email of a person that exists in a database.
+	/** Look person up in a database.
+	 * @param email email of a person that exists in a database
 	 * @param role person role (optional)
+	 * @return an object of class Alcoholic, Patron or Expert and null on failed
+	 * search.
 	 */
 	public static function look_up($email, $role = null) {
 		if($role == null) {
-			$found = FALSE;
+			$role_found = FALSE;
 			foreach(array("alcoholic", "patron", "expert") as $role) {
 				if(db_select("SELECT * FROM $role WHERE email='$email'") != null) {
 					// Role identified, create a specific person
-					$found = TRUE;
+					$role_found = TRUE;
 					break;
 				}
 			}
-			if($found === FALSE) {
+			if($role_found === FALSE) {
 				// Search fail
 				return null;
 			}
 		} else {
 			// Check the role
-			$date = db_select("SELECT * FROM $role WHERE email='$email'");
-			if($date == null) {
+			if(db_select("SELECT * FROM $role WHERE email='$email'") == null) {
 				// Search fail
 				return null;
 			}
@@ -126,8 +127,9 @@ class Person {
 		// Find a person
 		$data = db_select("SELECT * FROM person WHERE email='$email'");
 		if($data == null) {
-			// Search fail (should not happen here)
-			return;
+			// Search fail
+			// (should never happen here since each person has a role)
+			return null;
 		}
 		
 		// Create an object
@@ -139,7 +141,7 @@ class Person {
 			$person = new Expert();
 		}
 		
-		// Fill object attributes
+		// Set object attributes
 		$data = db_next($data);
 		$person->email = $email;
 		$person->name = $data["name"];
@@ -160,7 +162,7 @@ class Alcoholic extends Person {
 	/** List patrons that support this alcoholic.
 	 * @return an array of emails (might me empty)
 	 */
-	public function list_patrons() {
+	public function patrons() {
 		$patrons = array();
 		$data = db_select(
 			"SELECT email"
@@ -179,7 +181,7 @@ class Alcoholic extends Person {
 	/** List experts that supervise this alcoholic.
 	 * @return an array of emails (might me empty)
 	 */
-	public function list_experts() {
+	public function experts() {
 		$experts = array();
 		$data = db_select(
 			"SELECT email"
@@ -213,7 +215,7 @@ class Patron extends Person {
 	/** List alcoholics supported by this expert.
 	 * @return an array of emails (might me empty)
 	 */
-	public function list_alcoholics() {
+	public function alcoholics() {
 		$alcoholics = array();
 		$data = db_select(
 			"SELECT email"
@@ -267,7 +269,7 @@ class Expert extends Person {
 	/** List alcoholics supervised by this expert.
 	 * @return an array of emails (might me empty)
 	 */
-	public function list_alcoholics() {
+	public function alcoholics() {
 		$alcoholics = array();
 		$data = db_select(
 			"SELECT email"
