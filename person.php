@@ -20,11 +20,13 @@ class Person {
 	public $gender;
 	/** Picture (raw). */
 	public $picture;
-
-	/** Constructor a person. Missing arguments are set to null. */
+	/** Person role, one of {null, "alcoholic", "patron", "expert"}. */
+	public $role;
+	
+	/** Construct a person. Missing arguments are set to null. */
 	public function __construct(
-		$email = null, $name = null, $password = null,
-		$birthdate = null, $gender = null, $picture = null
+		$email = null, $name = null, $password = null, $birthdate = null,
+		$gender = null, $picture = null, $role = null
 	) {
 		$this->email = $email;
 		$this->name = $name;
@@ -32,25 +34,12 @@ class Person {
 		$this->birthdate = $birthdate;
 		$this->gender = $gender;
 		$this->picture = $picture;
-	}
-	
-	/** Look person up and fill the attributes.
-	 * @param email email of a person that MUST exist in a database.
-	 */
-	public function look_up($email) {
-		$data = db_next(db_select("SELECT * FROM person WHERE email='$email'"));
-		$this->email = $email;
-		$this->name = $data["name"];
-		$this->password = $data["password"];
-		$this->birthdate = $data["birthdate"];
-		$this->gender = $data["gender"];
-		$this->picture = $data["picture"];
+		$this->role = $role;
 	}
 	
 	/** Insert @c this as a new record in a person table.
-	 * @param role person role, one of {"alcoholic", "patron", "expert"}
 	 */
-	public function insert($role) {
+	public function insert() {
 		// Preprocess
 		$birthdate = isset($this->birthdate) ? "'$this->birthdate'" : "NULL";
 		$gender = isset($this->gender) ? "'$this->gender'" : "NULL";
@@ -70,7 +59,7 @@ class Person {
 		);
 		
 		// Insert role
-		db_insert($role, array("email" => "'$this->email'"));
+		db_insert($this->role, array("email" => "'$this->email'"));
 	}
 
 	/** Update a record in a person table. */
@@ -107,22 +96,66 @@ class Person {
 		return $people;
 	}
 	
+	/** Look person up and fill the attributes.
+	 * @param email email of a person that exists in a database.
+	 * @param role person role (optional)
+	 */
+	public static function look_up($email, $role = null) {
+		if($role == null) {
+			$found = FALSE;
+			foreach(array("alcoholic", "patron", "expert") as $role) {
+				if(db_select("SELECT * FROM $role WHERE email='$email'") != null) {
+					// Role identified, create a specific person
+					$found = TRUE;
+					break;
+				}
+			}
+			if($found === FALSE) {
+				// Search fail
+				return null;
+			}
+		} else {
+			// Check the role
+			$date = db_select("SELECT * FROM $role WHERE email='$email'");
+			if($date == null) {
+				// Search fail
+				return null;
+			}
+		}
+		
+		// Find a person
+		$data = db_select("SELECT * FROM person WHERE email='$email'");
+		if($data == null) {
+			// Search fail (should not happen here)
+			return;
+		}
+		
+		// Create an object
+		if($role == "alcoholic") {
+			$person = new Alcoholic();
+		} elseif($role == "patron") {
+			$person = new Patron();
+		} else {
+			$person = new Expert();
+		}
+		
+		// Fill object attributes
+		$data = db_next($data);
+		$person->email = $email;
+		$person->name = $data["name"];
+		$person->password = $data["password"];
+		$person->birthdate = $data["birthdate"];
+		$person->gender = $data["gender"];
+		$person->picture = $data["picture"];
+		$person->role = $role;
+		
+		// Success
+		return $person;
+	}
 }
 
 /** Alcoholic data. */
 class Alcoholic extends Person {
-	/** Constructor. Create empty parent and look up by email. */
-	public function __construct($email) {
-		Person::__construct();
-		$this->look_up($email);
-	}
-	
-	/** Role getter.
-	 * @return "alcoholic"
-	 */
-	public function role() {
-		return "alcoholic";
-	}
 	
 	/** List patrons that support this alcoholic.
 	 * @return an array of emails (might me empty)
@@ -164,7 +197,7 @@ class Alcoholic extends Person {
 	
 	/** List all meetings. */
 	public function meetings() {
-		return Meeting::meetings_of($this->email, $this->role());
+		return Meeting::meetings_of($this->email, $this->role);
 	}
 	
 	/** Meet a patron. */
@@ -176,18 +209,6 @@ class Alcoholic extends Person {
 
 /** Patron data. */
 class Patron extends Person {
-	/** Constructor. Create empty parent and look up by email. */
-	public function __construct($email) {
-		Person::__construct();
-		$this->look_up($email);
-	}
-	
-	/** Role getter.
-	 * @return "patron"
-	 */
-	public function role() {
-		return "patron";
-	}
 	
 	/** List alcoholics supported by this expert.
 	 * @return an array of emails (might me empty)
@@ -230,7 +251,7 @@ class Patron extends Person {
 	
 	/** List all meetings. */
 	public function meetings() {
-		return Meeting::meetings_of($this->email, $this->role());
+		return Meeting::meetings_of($this->email, $this->role);
 	}
 	
 	/** Meet an alcoholic. */
@@ -242,18 +263,6 @@ class Patron extends Person {
 
 /** Expert data. */
 class Expert extends Person {
-	/** Constructor. Create empty parent and look up by email. */
-	public function __construct($email) {
-		Person::__construct();
-		$this->look_up($email);
-	}
-	
-	/** Role getter.
-	 * @return "expert"
-	 */
-	public function role() {
-		return "expert";
-	}
 	
 	/** List alcoholics supervised by this expert.
 	 * @return an array of emails (might me empty)
@@ -293,45 +302,6 @@ class Expert extends Person {
 			"expert='$this->email' AND alcoholic='$email'"
 		);
 	}
-}
-
-/** Look person up in a database.
- * @param email email of a person
- * @return object of a specified role (Alcoholic, Patron or Expert) on
- * successful lookup, null otherwise
- */
-function person($email) {
-	// Find a role
-	foreach(array("alcoholic", "patron", "expert") as $role) {
-		if(db_select("SELECT * FROM $role WHERE email='$email'") != null) {
-			// Role identified, create a specific person
-			if($role == "alcoholic") {
-				return new Alcoholic($email);
-			} elseif($role == "patron") {
-				return new Patron($email);
-			} else {
-				return new Expert($email);
-			}
-		}
-	}
-	
-	// Such person does not exist
-	return null;
-}
-
-/** Create a list of people.
- * @param header table header
- * @param people array of emails
- */
-function list_of_people($header, $people) {
-	$table = new Table(array(new Text($header)));
-	foreach($people as $person) {
-		// Create a link
-		$link = new Link("profile.php?target=$person", person($person)->name);
-		// Add a row
-		$table->add(array($link));
-	}
-	return $table;
 }
 
 /** Meeting between an alcoholic and a patron. */

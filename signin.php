@@ -32,7 +32,7 @@ function form_process() {
 	$password = sanitize($_POST["password"]);
 
 	// Check against database
-	$person = person($user);
+	$person = Person::look_up($user);
 	return $person != null && $person->password == $password;
 }
 

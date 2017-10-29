@@ -21,11 +21,11 @@ if(isset($_SESSION["user"])) {
 	// Preset user data
 	$authorized = TRUE;
 	$email = $_SESSION["user"];
-	$person = person($email);
+	$person = Person::look_up($email);
 	$name = $person->name;
 	$birthdate = $person->birthdate;
 	$gender = $person->gender;
-	$role = $person->role();
+	$role = $person->role;
 }
 
 /** form to a block, so the element is surrounded by <div> element */
@@ -156,7 +156,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 		if($authorized) {
 			// Update person
-			$person = person($email);
+			$person = Person::look_up($email);
 			$person->name = $name;
 			$person->password = $password;
 			$person->birthdate = $birthdate;
@@ -166,9 +166,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 		} else {
 			// Insert person
 			$person = new Person(
-				$email, $name, $password, $birthdate, $gender, $picture
+				$email, $name, $password, $birthdate, $gender, $picture, $role
 			);
-			$person->insert($role);
+			$person->insert();
 		}
 
 		// Redirect

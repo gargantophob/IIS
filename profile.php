@@ -12,15 +12,30 @@ require_once "html.php";
 session_start();
 restrict_page_access();
 
+/** Create a list of people.
+ * @param header table header
+ * @param people array of emails
+ */
+function list_of_people($header, $people) {
+	$table = new Table(array(new Text($header)));
+	foreach($people as $person) {
+		// Create a link
+		$link = new Link("profile.php?target=$person", Person::look_up($person)->name);
+		// Add a row
+		$table->add(array($link));
+	}
+	return $table;
+}
+
 // Initialize the page
 $page = new Page();
 
 // Read source (session) and target
-$source = person($_SESSION["user"]);
+$source = Person::look_up($_SESSION["user"]);
 $target = $source;	// default target is the source
 if($_SERVER["REQUEST_METHOD"] == "GET") {
 	if(isset($_GET["target"])) {
-		$target = person($_GET["target"]);
+		$target = Person::look_up($_GET["target"]);
 	}
 	if(isset($_GET["date"])) {
 		// Meet target
@@ -32,7 +47,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET") {
 // Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 	// Extract hidden target
-	$target = person($_POST["target"]);
+	$target = Person::look_up($_POST["target"]);
 	
 	if(isset($_POST["log_out"])) {
 		// Log out
@@ -77,7 +92,7 @@ $page->add(new Text("Birthdate: " . $birthdate));
 $page->newline();
 $page->add(new Text("Gender: " . $gender));
 $page->newline();
-$page->add(new Text("Role: " . $target->role()));
+$page->add(new Text("Role: " . $target->role));
 $page->newline();
 $page->add(new Image("image.php?user=$target->email"));
 $page->newline();
@@ -92,7 +107,7 @@ if($source == $target) {
 }
 
 // Print specific data
-if($target->role() == "alcoholic") {
+if($target->role == "alcoholic") {
 	// Patrons
 	$page->add(list_of_people("$pa patrons:", $target->list_patrons()));
 	// Experts
@@ -103,13 +118,15 @@ if($target->role() == "alcoholic") {
 }
 
 // List meetings
-if($source == $target && $source->role() != "expert") {
+if($source == $target && $source->role != "expert") {
 	$meetings = $source->meetings();
 	$table = new Table(array(new Text("Your meetings:")));
 	foreach($meetings as $meeting) {
 		$meeting = Meeting::look_up($meeting); // ?!
-		$person = $source->role() == "alcoholic" ? $meeting->patron : $meeting->alcoholic;
-		$link = new Link("profile.php?target=$person", person($person)->name);
+		$person = $source->role == "alcoholic" ? $meeting->patron : $meeting->alcoholic;
+		$link = new Link(
+			"profile.php?target=$person", Person::look_up($person)->name
+		);
 		$date = new Text($meeting->date);
 		$table->add(array($link, $date));
 	}
@@ -138,8 +155,8 @@ if($target == $source) {
 	$form->add($input);
 } else {
 	if(
-		($source->role() == "alcoholic" && array_search($target->email, $source->list_patrons()) !== FALSE)
-		|| ($source->role() == "patron" && array_search($target->email, $source->list_alcoholics()) !== FALSE)
+		($source->role == "alcoholic" && array_search($target->email, $source->list_patrons()) !== FALSE)
+		|| ($source->role == "patron" && array_search($target->email, $source->list_alcoholics()) !== FALSE)
 	) {
 		// Create an appointment button
 		$input = new Input("button", "meet");
@@ -147,7 +164,7 @@ if($target == $source) {
 		$input->set("value", "Meet him");
 		$form->add($input);
 	}
-	if($source->role() != "alcoholic" && $target->role() == "alcoholic") {
+	if($source->role != "alcoholic" && $target->role == "alcoholic") {
 		if(array_search($target->email, $source->list_alcoholics()) !== FALSE) {
 			// Support stop button
 			$input = new Input("submit", "support_stop");
