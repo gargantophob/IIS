@@ -166,6 +166,12 @@ class Alcoholic extends Person {
 	public function meetings() {
 		return Meeting::meetings_of($this->email, $this->role());
 	}
+	
+	/** Meet a patron. */
+	public function meet($patron, $date) {
+		$meeting = new Meeting(-1, $this->email, $patron, $date);
+		$meeting->insert();
+	}
 }
 
 /** Patron data. */

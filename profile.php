@@ -138,8 +138,8 @@ if($target == $source) {
 	$form->add($input);
 } else {
 	if(
-		($source->role() == "alcoholic" && array_search($target->email, $source->list_patrons()))
-		|| ($source->role() == "patron" && array_search($target->email, $source->list_alcoholics()))
+		($source->role() == "alcoholic" && array_search($target->email, $source->list_patrons()) !== FALSE)
+		|| ($source->role() == "patron" && array_search($target->email, $source->list_alcoholics()) !== FALSE)
 	) {
 		// Create an appointment button
 		$input = new Input("button", "meet");
