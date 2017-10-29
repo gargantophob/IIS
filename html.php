@@ -6,44 +6,18 @@
  * @author xsemri00
  */
 
-/** HTML primitive. */
-abstract class Primitive {
-    protected $attributes;
-
-    public function set($attribute, $value) {
-        $this->attributes[$attribute] = $value;
-    }
-
-    public function get($attribute, $value) {
-        $this->attributes[$attribute] = $value;
-    }
-
-    protected function attr_html() {
-        $str = " ";
-        foreach($this->attributes as $attribute => $value) {
-            $str .= " $attribute='$value' ";
-        }
-        return $str;
-    }
-
-    public function __construct() {
-        $this->attributes = array();
-    }
-
-    /** Get html representation of a primitive. */
-    abstract public function html();
-}
-
 
 
 /** HTML page. {{{*/
 class Page {
     /** menubar element */
     static private $menu =
-    '<ul id="menubar">
+    '<nav>
+    <ul>
         <li><a href="signup.php">signup</a></li>
         <li><a href="signin.php">signin</a></li>
-    </ul>'
+    </ul>
+    </nav>'
     ;
 
     /** A collection of primitives. */
@@ -73,14 +47,21 @@ class Page {
 
         // Head + styles
         $page .= "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>";
-
         // Body
         $page .=  "<body>";
+
+        $page .= '<div class="container">';
+        $page .= '<header><h1>some header</h1></header>';
+
         // menu
         $page .= self::$menu;
+        $page .= '<article>';
         foreach ($this->primitives as $primitive) {
             $page .= $primitive->html();
         }
+        $page .= "</article>";
+        $page .= '<footer>IIS VUT FIT 2017</footer>';
+        $page .= "</div>";
         $page .= "</body>";
 
         // End the page
@@ -98,6 +79,37 @@ class Page {
 /** }}} */
 
 /****************************** PRIMITIVES ******************************/
+
+/** HTML primitive abstract class. */
+abstract class Primitive {
+    /** tag element attributes */
+    protected $attributes;
+
+    public function set($attribute, $value) {
+        $this->attributes[$attribute] = $value;
+    }
+
+    public function get($attribute, $value) {
+        $this->attributes[$attribute] = $value;
+    }
+
+    /** iterate over attributes and returns it in html notation */
+    protected function attr_html() {
+        $str = " ";
+        foreach($this->attributes as $attribute => $value) {
+            $str .= " $attribute='$value' ";
+        }
+        return $str;
+    }
+
+    public function __construct() {
+        $this->attributes = array();
+    }
+
+    /** Get html representation of a primitive. */
+    abstract public function html();
+}
+
 
 class Block extends Primitive {
     private $childs;
@@ -332,18 +344,18 @@ class Form extends Primitive {
 
 /** A table: array of array of primitives. */
 class Table extends Primitive {
-    /** Table header. */
-    private $header;
     /** Rows (array of arrays). */
     private $rows;
 
     /** Initialize a table.
      * @param header table header
      */
-    public function __construct($header) {
+    public function __construct($header = null) {
         parent::__construct();
-        $this->header = $header;
         $this->rows = array();
+        if ($header != null) {
+            array_push($this->rows, $header);
+        }
     }
 
     /** Append new row.
@@ -356,15 +368,23 @@ class Table extends Primitive {
     /** html() implementation. */
     public function html() {
         // TODO
+        /*
         $header = new Text($this->header);
         $newline = new CRLF();
-        $str = $header->html() . $newline->html();
+        $str = $header->html() . $newline->html();*/
+        $str = '<table>';
+        $tag = 'th';
         foreach($this->rows as $row) {
+            $str .= '<tr>';
             foreach($row as $item) {
-                $str .= $item->html() . "   ";
+                $str .= "<$tag>";
+                $str .= $item->html();
+                $str .= "</$tag>";
             }
-            $str .= $newline->html();
+            $tag = 'td';
+            $str .= '</tr>';
         }
+        $str .= '</table>';
         return $str;
     }
 }

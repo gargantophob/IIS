@@ -17,7 +17,8 @@ $page = new Page();
 
 // Construct a table
 $emails = Person::all();
-$table = new Table("Anonymous Alcoholics");
+$table = new Table();
+$table->add(array(new Text("Person"), new Text("Type")));
 foreach($emails as $email) {
 	$person = person($email);
 	$name = new Link("profile.php?target=$email", $person->name);

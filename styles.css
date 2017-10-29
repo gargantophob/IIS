@@ -7,39 +7,56 @@ label {
     float: left;
 }
 
-p {
-    text-align: center;
-    color: red;
-}
-
-/* simple table */
 table, th, td {
     border: 1px solid black;
-    border-collapse: collapse;
 }
 
-/* stuff with menu bars */
-#menubar {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+/* stuff with layout
+{{{ */
+div.container {
+    width: 100%;
+}
+
+nav{
+    float:left;
+    margin:0;
+    height: 700px;
+    border: 1px solid black;
+}
+
+nav ul{
+    list-style-type:none;
     background-color: #444444;
+    padding:0;
+    margin: 0;
+    overflow: hidden;
+    height: 100%;
 }
 
-#menubar li {
-    float: left;
-}
-
-#menubar li a {
+nav ul a{
+    text-decoration:none;
+    padding: 18px;
     display: block;
     color: white;
-    text-align: center;
-    padding: 18px;
-    text-decoration: none;
 }
 
-#menubar li a:hover {
+nav li a:hover {
     background-color: #111111;
     color: yellow;
 }
+
+article {
+    overflow: hidden;
+    padding: 2em;
+    text-align: left;
+}
+
+header, footer{
+    padding: 1em;
+    color: white;
+    background-color: grey;
+    clear:left;
+    text-align:center;
+}
+
+/* }}} */

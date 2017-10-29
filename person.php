@@ -301,7 +301,7 @@ function person($email) {
  * @param people array of emails
  */
 function list_of_people($header, $people) {
-	$table = new Table($header);
+	$table = new Table(array(new Text($header)));
 	foreach($people as $person) {
 		// Create a link
 		$link = new Link("profile.php?target=$person", person($person)->name);

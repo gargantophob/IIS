@@ -72,17 +72,6 @@ $form->add_error($error);
 
 // From created
 $page->add($form);
-$page->newline();
-
-// Sign up link
-$link = new Link("signup.php", "Sign up");
-$page->add($link);
-$page->newline();
-
-// Source code link
-$link = new Link("source.zip", "Source");
-$page->add($link);
-$page->newline();
 
 // Render the page
 $page->render();
