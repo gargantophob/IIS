@@ -226,6 +226,12 @@ class Patron extends Person {
 	public function meetings() {
 		return Meeting::meetings_of($this->email, $this->role());
 	}
+	
+	/** Meet an alcoholic. */
+	public function meet($alcoholic, $date) {
+		$meeting = new Meeting(-1, $alcoholic, $this->email, $date);
+		$meeting->insert();
+	}
 }
 
 /** Expert data. */

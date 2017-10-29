@@ -22,6 +22,11 @@ if($_SERVER["REQUEST_METHOD"] == "GET") {
 	if(isset($_GET["target"])) {
 		$target = person($_GET["target"]);
 	}
+	if(isset($_GET["date"])) {
+		// Meet target
+		$source->meet($target->email, $_GET["date"]);
+		redirect("profile.php?target=$target->email");
+	}
 }
 
 // Form handler
@@ -98,11 +103,11 @@ if($target->role() == "alcoholic") {
 }
 
 // List meetings
-if($source->role() != "expert") {
+if($source == $target && $source->role() != "expert") {
 	$meetings = $source->meetings();
 	$table = new Table(array(new Text("My meetings:")));
 	foreach($meetings as $meeting) {
-		$meeting = Meeting::meeting($meeting);
+		$meeting = Meeting::meeting($meeting); // ?!
 		$person = $source->role() == "alcoholic" ? $meeting->patron : $meeting->alcoholic;
 		$link = new Link("profile.php?target=$person", person($person)->name);
 		$date = new Text($meeting->date);
@@ -116,6 +121,7 @@ $form = new Form();
 
 // Hidden target parameter for POST transitions
 $input = new Input("text", "target");
+$input->set("id", "target");
 $input->set("value", $target->email);
 $input->set("hidden", "true");
 $form->add($input);
@@ -131,6 +137,16 @@ if($target == $source) {
 	$input->set("value", "Edit profile");
 	$form->add($input);
 } else {
+	if(
+		($source->role() == "alcoholic" && array_search($target->email, $source->list_patrons()))
+		|| ($source->role() == "patron" && array_search($target->email, $source->list_alcoholics()))
+	) {
+		// Create an appointment button
+		$input = new Input("button", "meet");
+		$input->set("id", "meet");
+		$input->set("value", "Meet him");
+		$form->add($input);
+	}
 	if($source->role() != "alcoholic" && $target->role() == "alcoholic") {
 		if(array_search($target->email, $source->list_alcoholics()) !== FALSE) {
 			// Support stop button
@@ -156,3 +172,30 @@ $page->newline();
 $page->render();
 
 ?>
+
+<script>
+var meet = document.getElementById("meet");
+meet.onclick = function() {
+	var target = document.getElementById("target").value;
+	var success = false;
+	var dateStr;
+	while(true) {
+		dateStr = prompt("When would you like to meet? (yyyy-mm-dd)", "");
+		if(dateStr == null) {
+			break;
+		}
+		var date = new Date(dateStr);
+		var year = date.getFullYear();
+		var month = eval(date.getMonth())+1;
+		var day = date.getDate();
+		if(!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+			success = true;
+			break;
+		}
+	}
+	
+	if(success) {
+		window.location.replace("profile.php?target=" + target + "&date=" + dateStr);
+	}
+}
+</script>
