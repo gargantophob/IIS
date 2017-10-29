@@ -315,9 +315,9 @@ function list_of_people($header, $people) {
 class Meeting {
 	/** Meeting identifier. */
 	public $id;
-	/** Alcoholic email. */
+	/** Alcoholic email (unquoted). */
 	public $alcoholic;
-	/** Patron email. */
+	/** Patron email (unquoted). */
 	public $patron;
 	/** Meeting date. */
 	public $date;
@@ -367,7 +367,7 @@ class Meeting {
 	 * @param role role of a person ("alcoholic" or "patron")
 	 * @return array of instances of a Meeting class (might be empty)
 	 */
-	public static function meetings($email, $role) {
+	public static function meetings_of($email, $role) {
 		$data = db_select("SELECT * FROM meeting WHERE $role='$email'");
 		$meetings = array();
 		if($data != null) {
