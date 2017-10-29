@@ -18,7 +18,7 @@ if(!empty($_SESSION["user"])) {
 }
 
 // Initialize the page
-$page = new Page();
+$page = new Page('Sign In');
 $user = $error = "";
 
 /** Form processor. Check username and his password.
@@ -26,11 +26,11 @@ $user = $error = "";
  */
 function form_process() {
 	global $user, $error;
-	
+
 	// Collect username and password
 	$user = sanitize($_POST["user"]);
 	$password = sanitize($_POST["password"]);
-	
+
 	// Check against database
 	$person = person($user);
 	return $person != null && $person->password == $password;

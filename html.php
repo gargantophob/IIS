@@ -8,23 +8,31 @@
 
 
 
-/** HTML page. {{{*/
+/** HTML page. */
+/** {{{ */
 class Page {
-    /** menubar element */
-    static private $menu =
-    '<nav>
+    /** Global menubar element */
+    static private $global_menu =
+    '<div class="menu column">
     <ul>
         <li><a href="signup.php">signup</a></li>
         <li><a href="signin.php">signin</a></li>
-    </ul>
-    </nav>'
+    </ul></div>'
     ;
 
     /** A collection of primitives. */
     private $primitives;
 
+    /** Page header text. */
+    private $header;
+
+    /** Page menu bar. */
+    private $menu;
+
     /** Initialize the page. */
-    public function __construct() {
+    public function __construct($header = 'Some Header', $menu = null) {
+        $this->header = $header;
+        $this->menu =$menu == null ? self::$global_menu : $menu;
         $this->primitives = array();
     }
 
@@ -46,22 +54,22 @@ class Page {
         $page = "<!DOCTYPE html> <html>";
 
         // Head + styles
-        $page .= "<head><link rel=\"stylesheet\" href=\"styles.css\"></head>";
+        $page .= '<head><link rel="stylesheet" href="styles.css"></head>';
         // Body
-        $page .=  "<body>";
+        $page .= '<body>';
 
-        $page .= '<div class="container">';
-        $page .= '<header><h1>some header</h1></header>';
+        $page .= "<div class=\"header\"><h1>$this->header</h1></div>";
+        $page .= '<div class="clearfix">';
 
         // menu
-        $page .= self::$menu;
-        $page .= '<article>';
+        $page .= $this->menu;
+        $page .= '<div class="content column">';
         foreach ($this->primitives as $primitive) {
             $page .= $primitive->html();
         }
-        $page .= "</article>";
-        $page .= '<footer>IIS VUT FIT 2017</footer>';
         $page .= "</div>";
+        $page .= "</div>";
+        $page .= '<div class="footer">IIS VUT FIT 2017</div>';
         $page .= "</body>";
 
         // End the page
@@ -367,11 +375,6 @@ class Table extends Primitive {
 
     /** html() implementation. */
     public function html() {
-        // TODO
-        /*
-        $header = new Text($this->header);
-        $newline = new CRLF();
-        $str = $header->html() . $newline->html();*/
         $str = '<table>';
         $tag = 'th';
         foreach($this->rows as $row) {
@@ -386,6 +389,35 @@ class Table extends Primitive {
         }
         $str .= '</table>';
         return $str;
+    }
+}
+
+class Listing extends Primitive {
+    /** list type - ul, ol, il, etc. */
+    private $type;
+    /** list items */
+    private $items;
+
+    static public $list_types = array('ul', 'ol', 'dd', 'dt', 'dl');
+
+    public function __construct($type = 'ul') {
+        assert(in_array($type, Listing::$list_types));
+        $this->type = $type;
+        parent::__construct();
+        $this->items = array();
+    }
+
+    public function add($item) {
+        array_push($this->items, $item);
+    }
+
+    public function html() {
+        $ret = "< $this->type>" . $this->attr_html() . '>';
+        foreach ($this->childs as $primitive) {
+            $ret .= '<li>' . $primitive->html() . '</li>';
+        }
+        $ret .= "<$this->type>";
+        return $ret;
     }
 }
 

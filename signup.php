@@ -12,7 +12,7 @@ require_once "html.php";
 session_start();
 
 // Initialize the page
-$page = new Page();
+$page = new Page('Sign Up');
 $email = $name = $password = $birthdate = $gender = $picture = $role = "";
 $error = "";
 $authorized = FALSE; // session active

@@ -11,52 +11,64 @@ table, th, td {
     border: 1px solid black;
 }
 
-/* stuff with layout
-{{{ */
-div.container {
-    width: 100%;
+/* layout stuff
+{{{*/
+* {
+    box-sizing:border-box;
 }
 
-nav{
-    float:left;
-    margin:0;
-    height: 700px;
-    border: 1px solid black;
-}
-
-nav ul{
-    list-style-type:none;
-    background-color: #444444;
-    padding:0;
-    margin: 0;
-    overflow: hidden;
-    height: 100%;
-}
-
-nav ul a{
-    text-decoration:none;
-    padding: 18px;
-    display: block;
-    color: white;
-}
-
-nav li a:hover {
-    background-color: #111111;
-    color: yellow;
-}
-
-article {
-    overflow: hidden;
-    padding: 2em;
-    text-align: left;
-}
-
-header, footer{
-    padding: 1em;
-    color: white;
+.header, .footer{
     background-color: grey;
-    clear:left;
-    text-align:center;
+    color: black;
+    padding: 15px;
+    text-align: center;
 }
 
+.column{
+    float:left;
+    padding:15px;
+}
+
+.clearfix::after{
+    content:"";
+    clear:both;
+    display:table;
+}
+
+.menu{
+    width:25%;
+    height:100%;
+}
+
+.content{
+    background-color:MediumSeaGreen;
+    padding: 3em;
+    width:75%;
+}
+
+.menu ul{
+    list-style-type:none;
+    margin:0;
+    padding:0;
+}
+
+.menu li{
+    padding:8px;
+    margin-bottom:8px;
+    background-color:#00cc44;
+    color:#ffffff;
+}
+
+.menu li:hover{
+    background-color: #00802b;
+}
+
+.menu li a {
+    color: white;
+    text-decoration:none;
+}
+
+.menu li a:hover {
+    color: orange;
+}
 /* }}} */
