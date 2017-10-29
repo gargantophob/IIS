@@ -97,6 +97,20 @@ if($target->role() == "alcoholic") {
 	$page->add(list_of_people("$pa alcoholics:", $target->list_alcoholics()));
 }
 
+// List meetings
+if($source->role() != "expert") {
+	$meetings = $source->meetings();
+	$table = new Table(array(new Text("My meetings:")));
+	foreach($meetings as $meeting) {
+		$meeting = Meeting::meeting($meeting);
+		$person = $source->role() == "alcoholic" ? $meeting->patron : $meeting->alcoholic;
+		$link = new Link("profile.php?target=$person", person($person)->name);
+		$date = new Text($meeting->date);
+		$table->add(array($link, $date));
+	}
+	$page->add($table);	
+}
+	
 // A bunch of buttons
 $form = new Form();
 

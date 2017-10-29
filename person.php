@@ -106,6 +106,7 @@ class Person {
 		}
 		return $people;
 	}
+	
 }
 
 /** Alcoholic data. */
@@ -159,6 +160,11 @@ class Alcoholic extends Person {
 			}
 		}
 		return $experts;
+	}
+	
+	/** List all meetings. */
+	public function meetings() {
+		return Meeting::meetings_of($this->email, $this->role());
 	}
 }
 
@@ -214,6 +220,11 @@ class Patron extends Person {
 			"patron_supports",
 			"patron='$this->email' AND alcoholic='$email'"
 		);
+	}
+	
+	/** List all meetings. */
+	public function meetings() {
+		return Meeting::meetings_of($this->email, $this->role());
 	}
 }
 
@@ -372,7 +383,7 @@ class Meeting {
 		$meetings = array();
 		if($data != null) {
 			while($row = db_next($data)) {
-				array_push($meetins, $row["id"]);
+				array_push($meetings, $row["id"]);
 			}
 		}
 		return $meetings;
