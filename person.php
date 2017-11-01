@@ -154,6 +154,25 @@ class Person {
 		// Success
 		return $person;
 	}
+	
+	/** Enroll a @c session. */
+	public function enroll($session) {
+		db_insert(
+			"person_session",
+			array(
+				"id"		=> $session,
+				"email"		=> "'$this->email'"
+			)
+		);
+	}
+	
+	/** Unenroll from a @c session. */
+	public function unenroll($session) {
+		db_delete(
+			"person_session",
+			"id=$session AND email='$this->email'"
+		);
+	}
 }
 
 /** Alcoholic data. */
@@ -453,6 +472,22 @@ class Session {
 		);
 	}
 	
+	/** Get session members.
+	 * @return array of emails (might be empty)
+	 */
+	public function members() {
+		$members = array();
+		$data = db_select(
+			"SELECT email FROM person_session WHERE id='$this->id'"
+		);
+		if($data != null) {
+			while($row = db_next($data)) {
+				array_push($members, $row["email"]);
+			}
+		}
+		return $members;
+	}
+	
 	/** Look session up by identifier.
 	 * @return an instance of a Session class or null on failed search
 	 */
@@ -472,7 +507,7 @@ class Session {
 	}
 	
 	/** Look up all sessions.
-	 * @return array of place identifiers (might be empty)
+	 * @return array of session identifiers (might be empty)
 	 */
 	public static function all() {
 		$sessions = array();
@@ -483,6 +518,79 @@ class Session {
 			}
 		}
 		return $sessions;
+	}
+}
+
+/** Test data. */
+class Test {
+	/** Test identifier. */
+	public $id;
+	/** Date. */
+	public $date;
+	/** Blood alcohol content. */
+	public $bac;
+	/** Alcoholic. */
+	public $alcoholic;
+	/** Expert (might be NULL). */
+	public $expert;
+	
+	/** Construct a test. */
+	public function __construct($id, $date, $bac, $alcoholic, $expert) {
+		$this->id = $id;
+		$this->date = $date;
+		$this->bac = $bac;
+		$this->alcoholic = $alcoholic;
+		$this->expert = $expert;
+	}
+	
+	/** Register a new test in a database. */
+	public function insert() {
+		// Preprocess
+		$expert = $this->expert;
+		if($expert == null) {
+			$expert = "NULL";
+		}
+		
+		// Insert
+		$res = db_insert(
+			"test",
+			array(
+				"date"		=> "'$this->date'",
+				"bac"		=> "$this->bac",
+				"alcoholic"	=> "'$this->alcoholic'",
+				"expert"	=> "'$this->expert'"
+			)
+		);
+	}
+
+	/** Look test up by identifier.
+	 * @return an instance of a Test class or null on failed search
+	 */
+	public static function look_up($id) {
+		// Look test up
+		$data = db_select("SELECT * FROM test WHERE id=$id");
+		if($data == null) {
+			// Session does not exist
+			return null;
+		}
+		
+		// Instantiate
+		$test = db_next($data);
+		$expert = $test["expert"];
+		if($expert == "NULL") {
+			$expert = null;
+		}
+		return new Test(
+			$id, $test["date"], $test["bac"], $test["alcoholic"],  $expert
+		);
+	}
+	
+	/** Look up all tests.
+	 * @return array of place identifiers (might be empty)
+	 */
+	public static function all() {
+		// TODO
+		return array();
 	}
 }
 

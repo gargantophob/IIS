@@ -13,6 +13,7 @@ session_start();
 restrict_page_access();
 
 $session = null;
+$source = Person::look_up($_SESSION["user"]);
 if($_SERVER["REQUEST_METHOD"] == "GET") {
 	if(isset($_GET["session"])) {
 		$session = Session::look_up($_GET["session"]);
@@ -24,6 +25,23 @@ if($_SERVER["REQUEST_METHOD"] == "GET") {
 	} else {
 		// TODO redirect to all sessions
 		redirect("sessions.php");
+	}
+}
+
+// Form handler
+if($_SERVER["REQUEST_METHOD"] == "POST") {
+	// Extract session
+	$session = Session::look_up($_POST["session"]);
+	// Differentiate buttons
+	if(isset($_POST["enroll"])) {
+		$source->enroll($session->id);
+	}
+	if(isset($_POST["unenroll"])) {
+		$source->unenroll($session->id);
+	}
+	if(isset($_POST["test"])) {
+		$test = new Test(-1, "1990-12-12", 0.1, $source->email, null);
+		$test->insert();
 	}
 }
 
@@ -40,6 +58,46 @@ $page->newline();
 $page->add(new Text("Leader: "));
 $leader = Person::look_up($session->leader);
 $page->add(new Link("profile.php?target=$leader->email", $leader->name));
+$page->newline();
+
+// Print members
+$table = new Table(array(new Text("members")));
+$members = $session->members();
+foreach($members as $member) {
+	$person = Person::look_up($member);
+	$link = new Link(
+		"profile.php?target=$person->email",
+		$person->name
+	);
+	$table->add(array($link));
+}
+$page->add($table);
+
+
+// Enroll/unenroll buttons
+$form = new Form();
+
+$input = new Input("text", "session");
+$input->set("value", "$session->id");
+$input->set("hidden", "true");
+$form->add($input);
+
+if(array_search($source->email, $members) !== FALSE) {
+	$name = "unenroll";
+	$value = "Unenroll";
+} else {
+	$name = "enroll";
+	$value = "Enroll";
+}
+$input = new Input("submit", $name);
+$input->set("value", $value);
+$form->add($input);
+
+$input = new Input("submit", "test");
+$input->set("value", "Test");
+$form->add($input);
+
+$page->add($form);
 $page->newline();
 
 // Render the page
