@@ -131,7 +131,8 @@ if($target->role == "alcoholic") {
 // List meetings
 if($source == $target && $source->role != "expert") {
 	$meetings = $source->meetings();
-	$table = new Table(array(new Text("Your meetings:")));
+	$page->add(new Text("Your meetings:"));
+	$table = new Table(array(new Text("Patron"), new Text("Date")));
 	foreach($meetings as $meeting) {
 		$meeting = Meeting::look_up($meeting);
 		$person = $source->role == "alcoholic" ? $meeting->patron : $meeting->alcoholic;
@@ -167,6 +168,36 @@ if($target == $source) {
 	$input = new Input("submit", "edit");
 	$input->set("value", "Edit profile");
 	$form->add($input);
+	
+	if($source->role == "alcoholic") {
+		// List reports
+		$reports = $source->reports();
+		$page->add(new Text("Your reports:"));
+		$table = new Table(array(
+			new Text("Date"), new Text("BAC"), new Text("Reported by"), new Text("Alcohol type"),  new Text("Alcohol origin")
+		));
+		foreach($reports as $report) {
+			$report = Report::look_up($report);
+			$date = new Text($report->date);
+			$bac = new Text($report->bac);
+			$reporter = $report->expert;
+			if($reporter == null) {
+				$reporter = new Text("Self-reported");
+			} else {
+				$reporter = Person::look_up($reporter);
+				$reporter = new Link(
+					"profile.php?target=$reporter->email", $reporter->name
+				);
+			}
+			$alcohol = Alcohol::look_up($report->alcohol);
+			$type = new Text($alcohol->type);
+			$origin = new Text($alcohol->origin);
+			$table->add(array(
+				$date, $bac, $reporter, $type, $origin
+			));
+		}
+		$page->add($table);	
+	}
 } else {
 	// Support start/drop buttons
 	if($source->role != "alcoholic" && $target->role == "alcoholic") {
@@ -211,8 +242,13 @@ $page->add(new Link("sessions.php", "All sessions"));
 $page->newline();
 
 // Report page
-$page->add(new Link("new_report.php?target=$target->email", "Report alcohol consumption"));
-$page->newline();
+if(
+	($source == $target && $source->role == "alcoholic")
+	|| ($source->role == "expert" && $target->role == "alcoholic")
+) {
+	$page->add(new Link("new_report.php?target=$target->email", "Report alcohol consumption"));
+	$page->newline();
+}
 
 // Render the page
 $page->render();

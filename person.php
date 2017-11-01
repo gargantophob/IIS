@@ -226,6 +226,23 @@ class Alcoholic extends Person {
 		$meeting = new Meeting(-1, $this->email, $email, $date);
 		$meeting->insert();
 	}
+	
+	/** List reports. */
+	public function reports() {
+		$records = array();
+		$data = db_select(
+			"SELECT id"
+			. " FROM alcoholic JOIN report"
+			. " ON alcoholic.email = report.alcoholic"
+			. " WHERE alcoholic.email = '$this->email'"
+		);
+		if($data != null) {
+			while($row = db_next($data)) {
+				array_push($records, $row["id"]);
+			}
+		}
+		return $records;
+	}
 }
 
 /** Patron data. */
@@ -596,7 +613,7 @@ class Report {
 	 * @return array of report identifiers (might be empty)
 	 */
 	public static function all() {
-		// TODO
+		// TODO?
 		return array();
 	}
 }
