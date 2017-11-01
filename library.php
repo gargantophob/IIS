@@ -141,4 +141,17 @@ function db_delete($table, $condition) {
 	return db_query("DELETE FROM " . $table . " WHERE " . $condition);
 }
 
+/** Return all primary key from a table.
+ * @return array of primary keys (might be empty)
+ */
+function all($table, $key) {
+	$records = array();
+	$data = db_select("SELECT $key FROM $table");	
+	if($data != null) {
+		while($row = db_next($data)) {
+			array_push($records, $row[$key]);
+		}
+	}
+	return $records;
+}
 ?>

@@ -82,6 +82,25 @@ class Person {
 		);
 	}
 
+	/** Enroll a @c session. */
+	public function enroll($session) {
+		db_insert(
+			"person_session",
+			array(
+				"id"		=> $session,
+				"email"		=> "'$this->email'"
+			)
+		);
+	}
+	
+	/** Unenroll from a @c session. */
+	public function unenroll($session) {
+		db_delete(
+			"person_session",
+			"id=$session AND email='$this->email'"
+		);
+	}
+	
 	/** Look person up in a database.
 	 * @param email email of a person that exists in a database
 	 * @param role person role (optional)
@@ -145,33 +164,7 @@ class Person {
 	 * @return array of emails (might be empty)
 	 */
 	public static function all() {
-		$people = array();
-		$data = db_select("SELECT email FROM person");	
-		if($data != null) {
-			while($row = db_next($data)) {
-				array_push($people, $row["email"]);
-			}
-		}
-		return $people;
-	}
-	
-	/** Enroll a @c session. */
-	public function enroll($session) {
-		db_insert(
-			"person_session",
-			array(
-				"id"		=> $session,
-				"email"		=> "'$this->email'"
-			)
-		);
-	}
-	
-	/** Unenroll from a @c session. */
-	public function unenroll($session) {
-		db_delete(
-			"person_session",
-			"id=$session AND email='$this->email'"
-		);
+		return all("person", "email");
 	}
 }
 
@@ -447,14 +440,7 @@ class Place {
 	 * @return array of place identifiers (might be empty)
 	 */
 	public static function all() {
-		$places = array();
-		$data = db_select("SELECT id FROM place");	
-		if($data != null) {
-			while($row = db_next($data)) {
-				array_push($places, $row["id"]);
-			}
-		}
-		return $places;
+		return all("place", "id");
 	}
 }
 
@@ -527,14 +513,7 @@ class Session {
 	 * @return array of session identifiers (might be empty)
 	 */
 	public static function all() {
-		$sessions = array();
-		$data = db_select("SELECT id FROM session");	
-		if($data != null) {
-			while($row = db_next($data)) {
-				array_push($sessions, $row["id"]);
-			}
-		}
-		return $sessions;
+		return all("session", "id");
 	}
 }
 
@@ -614,7 +593,7 @@ class Report {
 	 */
 	public static function all() {
 		// TODO?
-		return array();
+		return all("report", "id");
 	}
 }
 
@@ -668,14 +647,7 @@ class Alcohol {
 	 * @return array of alcohol identifiers (might be empty)
 	 */
 	public static function all() {
-		$records = array();
-		$data = db_select("SELECT id FROM alcohol");	
-		if($data != null) {
-			while($row = db_next($data)) {
-				array_push($records, $row["id"]);
-			}
-		}
-		return $records;
+		return all("alcohol", "id");
 	}
 }
 
