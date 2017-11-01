@@ -82,20 +82,6 @@ class Person {
 		);
 	}
 
-	/** Extract all members.
-	 * @return array of emails (might be empty)
-	 */
-	public static function all() {
-		$people = array();
-		$data = db_select("SELECT email FROM person");	
-		if($data != null) {
-			while($row = db_next($data)) {
-				array_push($people, $row["email"]);
-			}
-		}
-		return $people;
-	}
-	
 	/** Look person up in a database.
 	 * @param email email of a person that exists in a database
 	 * @param role person role (optional)
@@ -153,6 +139,20 @@ class Person {
 		
 		// Success
 		return $person;
+	}
+	
+	/** Extract all members.
+	 * @return array of emails (might be empty)
+	 */
+	public static function all() {
+		$people = array();
+		$data = db_select("SELECT email FROM person");	
+		if($data != null) {
+			while($row = db_next($data)) {
+				array_push($people, $row["email"]);
+			}
+		}
+		return $people;
 	}
 	
 	/** Enroll a @c session. */
@@ -521,9 +521,9 @@ class Session {
 	}
 }
 
-/** Test data. */
-class Test {
-	/** Test identifier. */
+/** Report data. */
+class Report {
+	/** Report identifier. */
 	public $id;
 	/** Date. */
 	public $date;
@@ -533,17 +533,22 @@ class Test {
 	public $alcoholic;
 	/** Expert (might be NULL). */
 	public $expert;
+	/** Alcohol id. */
+	public $alcohol;
 	
-	/** Construct a test. */
-	public function __construct($id, $date, $bac, $alcoholic, $expert) {
+	/** Construct a report. */
+	public function __construct(
+		$id, $date, $bac, $alcoholic, $expert, $alcohol
+	) {
 		$this->id = $id;
 		$this->date = $date;
 		$this->bac = $bac;
 		$this->alcoholic = $alcoholic;
 		$this->expert = $expert;
+		$this->alcohol = $alcohol;
 	}
 	
-	/** Register a new test in a database. */
+	/** Register a new report in a database. */
 	public function insert() {
 		// Preprocess
 		$expert = $this->expert;
@@ -553,44 +558,107 @@ class Test {
 		
 		// Insert
 		$res = db_insert(
-			"test",
+			"report",
 			array(
 				"date"		=> "'$this->date'",
 				"bac"		=> "$this->bac",
 				"alcoholic"	=> "'$this->alcoholic'",
-				"expert"	=> "'$this->expert'"
+				"expert"	=> "'$this->expert'",
+				"alcohol"	=> "$this->alcohol"
 			)
 		);
 	}
 
-	/** Look test up by identifier.
-	 * @return an instance of a Test class or null on failed search
+	/** Look report up by identifier.
+	 * @return an instance of a Report class or null on failed search
 	 */
 	public static function look_up($id) {
-		// Look test up
-		$data = db_select("SELECT * FROM test WHERE id=$id");
+		// Look report up
+		$data = db_select("SELECT * FROM report WHERE id=$id");
 		if($data == null) {
-			// Session does not exist
+			// Report does not exist
 			return null;
 		}
 		
 		// Instantiate
-		$test = db_next($data);
-		$expert = $test["expert"];
+		$report = db_next($data);
+		$expert = $report["expert"];
 		if($expert == "NULL") {
 			$expert = null;
 		}
-		return new Test(
-			$id, $test["date"], $test["bac"], $test["alcoholic"],  $expert
+		return new Report(
+			$id, $report["date"], $report["bac"], $report["alcoholic"], 
+			$expert, $report["alcohol"]
 		);
 	}
 	
-	/** Look up all tests.
-	 * @return array of place identifiers (might be empty)
+	/** Look up all reports.
+	 * @return array of report identifiers (might be empty)
 	 */
 	public static function all() {
 		// TODO
 		return array();
+	}
+}
+
+/** Alcohol data. */
+class Alcohol {
+	/** Alcohol identifier. */
+	public $id;
+	/** Alcohol type. */
+	public $type;
+	/** Country of origin. */
+	public $origin;
+	
+	/** Construct an alcohol. */
+	public function __construct($id, $type, $origin) {
+		$this->id = $id;
+		$this->type = $type;
+		$this->origin = $origin;
+	}
+	
+	/** Register a new alcohol in a database. */
+	public function insert() {
+		// Insert
+		return db_insert(
+			"alcohol",
+			array(
+				"type"		=> "'$this->type'",
+				"origin"	=> "'$this->origin'"
+			)
+		);
+	}
+
+	/** Look alcohol up by identifier.
+	 * @return an instance of an Alcohol class or null on failed search
+	 */
+	public static function look_up($id) {
+		// Look alcohol up
+		$data = db_select("SELECT * FROM alcohol WHERE id=$id");
+		if($data == null) {
+			// Alcohol does not exist
+			return null;
+		}
+		
+		// Instantiate
+		$alcohol = db_next($data);
+		return new Alcohol(
+			$id, $alcohol["type"], $alcohol["origin"]
+		);
+	}
+	
+	/** Look up all alcohol variants.
+	 * @return array of alcohol identifiers (might be empty)
+	 */
+	public static function all() {
+		$records = array();
+		$data = db_select("SELECT id FROM alcohol");	
+		if($data != null) {
+			while($row = db_next($data)) {
+				array_push($records, $row["id"]);
+			}
+		}
+		return $records;
 	}
 }
 

@@ -39,10 +39,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	if(isset($_POST["unenroll"])) {
 		$source->unenroll($session->id);
 	}
-	if(isset($_POST["test"])) {
-		$test = new Test(-1, "1990-12-12", 0.1, $source->email, null);
-		$test->insert();
-	}
 }
 
 // Initialize the page
@@ -91,10 +87,6 @@ if(array_search($source->email, $members) !== FALSE) {
 }
 $input = new Input("submit", $name);
 $input->set("value", $value);
-$form->add($input);
-
-$input = new Input("submit", "test");
-$input->set("value", "Test");
 $form->add($input);
 
 $page->add($form);

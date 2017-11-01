@@ -210,6 +210,10 @@ $page->newline();
 $page->add(new Link("sessions.php", "All sessions"));
 $page->newline();
 
+// Report page
+$page->add(new Link("new_report.php?target=$target->email", "Report alcohol consumption"));
+$page->newline();
+
 // Render the page
 $page->render();
 
