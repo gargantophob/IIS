@@ -6,6 +6,8 @@
  */
 require_once "library.php";
 
+/** TODO */
+
 /** Person data. */
 class Person {
 	/** Email, unquoted string. */
@@ -85,9 +87,9 @@ class Person {
 	/** Enroll a @c session. */
 	public function enroll($session) {
 		db_insert(
-			"person_session",
+			"person_attends",
 			array(
-				"id"		=> $session,
+				"session"	=> $session,
 				"email"		=> "'$this->email'"
 			)
 		);
@@ -96,8 +98,8 @@ class Person {
 	/** Unenroll from a @c session. */
 	public function unenroll($session) {
 		db_delete(
-			"person_session",
-			"id=$session AND email='$this->email'"
+			"person_attends",
+			"session=$session AND email='$this->email'"
 		);
 	}
 	
@@ -481,7 +483,7 @@ class Session {
 	public function members() {
 		$members = array();
 		$data = db_select(
-			"SELECT email FROM person_session WHERE id='$this->id'"
+			"SELECT email FROM person_attends WHERE session='$this->id'"
 		);
 		if($data != null) {
 			while($row = db_next($data)) {
