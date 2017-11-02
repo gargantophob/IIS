@@ -11,6 +11,9 @@ require_once "html.php";
 
 session_start();
 
+/**/
+/**/
+
 // Redirect to profile page if already signed in.
 if(!empty($_SESSION["user"])) {
 	$_SESSION["target"] = $_SESSION["user"];

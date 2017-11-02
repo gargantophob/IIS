@@ -76,7 +76,7 @@ function form_process() {
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 	if(form_process() === TRUE) {
 		// Create a report
-		$report = new Report(-1, $date, $bac, $alcoholic, $expert, $alcohol);
+		$report = new Report(-1, $date, $bac, $alcoholic, $expert);
 		$report->insert();
 		redirect("profile.php");
 	}

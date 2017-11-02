@@ -174,7 +174,7 @@ if($target == $source) {
 		$reports = $source->reports();
 		$page->add(new Text("Your reports:"));
 		$table = new Table(array(
-			new Text("Date"), new Text("BAC"), new Text("Reported by"), new Text("Alcohol type"),  new Text("Alcohol origin")
+			new Text("Date"), new Text("BAC"), new Text("Reported by")
 		));
 		foreach($reports as $report) {
 			$report = Report::look_up($report);
@@ -189,11 +189,8 @@ if($target == $source) {
 					"profile.php?target=$reporter->email", $reporter->name
 				);
 			}
-			$alcohol = Alcohol::look_up($report->alcohol);
-			$type = new Text($alcohol->type);
-			$origin = new Text($alcohol->origin);
 			$table->add(array(
-				$date, $bac, $reporter, $type, $origin
+				$date, $bac, $reporter
 			));
 		}
 		$page->add($table);	
