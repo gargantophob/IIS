@@ -41,8 +41,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	}
 }
 
-// Initialize the page
-$page = new Page();
+// Initialize the page XXX does not work
+$page = new Page(3);
 
 // Print session info
 $page->add(new Text("Place: " . Place::look_up($session->place)->address));

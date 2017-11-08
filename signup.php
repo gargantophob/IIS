@@ -11,8 +11,6 @@ require_once "html.php";
 
 session_start();
 
-// Initialize the page
-$page = new Page(1);
 $email = $password = $name = $birthdate = $gender = $picture = $role = "";
 $error = "";
 $authorized = FALSE; // session active
@@ -27,6 +25,9 @@ if(isset($_SESSION["user"])) {
 	$gender = $person->gender;
 	$role = $person->role;
 }
+
+// Initialize the page
+$page = new Page(1);
 
 /** form to a block, so the element is surrounded by <div> element */
 function to_block($element, $classname = null) {
@@ -261,6 +262,7 @@ $form->add_error($error);
 $page->add($form);
 
 // Render the page
+$page->set_authorized($authorized);
 $page->render();
 ?>
 

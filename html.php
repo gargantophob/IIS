@@ -12,39 +12,51 @@ class Page {
     /** A collection of primitives. */
     private $primitives;
 
-    /** Page header text. */
-    private $header;
+    /** Authorized flag. */
+    private $authorized;
 
     /** Active item in menubar. */
     private $active_idx;
 
+    public function set_authorized($authorized) {
+        $this->authorized = $authorized;
+    }
+
+    public function activate($idx) {
+        $active_idx = $idx;
+    }
+
     /** Initialize the page.
      *  @param active_idx index of highlighted item in menubar
+     *  @authorized state of navigation bar
      */
-    public function __construct($active_idx = 0)
+    public function __construct($active_idx = -1, $authorized = true)
     {
         $this->primitives = array();
         $this->active_idx = $active_idx;
+        $this->authorized = $authorized;
     }
 
     public function menu() {
         $topnav = new Block();
         $topnav->set('class', 'topnav');
-        if (1) {
+        if ($this->authorized) {
+            // XXX add correct links
+            $topnav->add(new Link('signin.php', 'my profile'));
+            $topnav->add(new Link('signup.php', 'edit profile'));
+            $topnav->add(new Link('members.php', 'people'));
+            $topnav->add(new Link('session.php', 'sessions'));
+            $topnav->add(new Link('signin.php', 'log out'));
+        }
+        else {
             $topnav->add(new Link('signin.php', 'signin'));
             $topnav->add(new Link('signup.php', 'signup'));
             $topnav->add(new Link('about.php', 'about'));
         }
-        else {
-            // XXX add correct links
-            $topnav->add(new Link('signin.php', 'my profile'));
-            $topnav->add(new Link('signin.php', 'sessions'));
-            $topnav->add(new Link('signin.php', 'people'));
-            $topnav->add(new Link('signin.php', 'log out'));
-        }
 
-        assert($this->active_idx < count($topnav->childs));
-        $topnav->childs[$this->active_idx]->set('class', 'active');
+        if (array_key_exists($this->active_idx, $topnav->childs)) {
+            $topnav->childs[$this->active_idx]->set('class', 'active');
+        }
 
         return $topnav->html();
     }
