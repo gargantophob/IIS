@@ -13,7 +13,7 @@ session_start();
 
 // Initialize the page
 $page = new Page(1);
-$email = $name = $password = $birthdate = $gender = $picture = $role = "";
+$email = $password = $name = $birthdate = $gender = $picture = $role = "";
 $error = "";
 $authorized = FALSE; // session active
 
@@ -42,7 +42,7 @@ function to_block($element, $classname = null) {
  * @return TRUE on success, FALSE otherwise.
  */
 function form_process() {
-	global $email, $name, $password, $birthdate, $gender, $picture, $role;
+	global $email, $password, $name, $birthdate, $gender, $picture, $role;
 	global $error;
 	global $authorized;
 
@@ -78,8 +78,9 @@ function form_process() {
 
 	if(!$authorized) {
 		// Check email uniqueness
-		if(Person::look_up($email) != null) {
-			$error = "User with this email already exists.";
+		$person = Person::look_up($email);
+		if($person != null) {
+			$error = "User with this email already exists." . $person->name . $person->email . $person->password . $person->role;
 			return FALSE;
 		}
 	}
@@ -157,8 +158,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 		if($authorized) {
 			// Update person
 			$person = Person::look_up($email);
-			$person->name = $name;
 			$person->password = $password;
+			$person->name = $name;
 			$person->birthdate = $birthdate;
 			$person->gender = $gender;
 			$person->picture = $picture;
@@ -166,7 +167,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 		} else {
 			// Insert person
 			$person = new Person(
-				$email, $name, $password, $birthdate, $gender, $picture, $role
+				$email, $password, $name, $birthdate, $gender, $picture, $role
 			);
 			$person->insert();
 		}

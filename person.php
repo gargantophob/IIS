@@ -11,10 +11,10 @@ require_once "database.php";
 class Person {
 	/** Email, unquoted string. */
 	public $email;
-	/** Name, unquoted string. */
-	public $name;
 	/** Password, unquoted string. */
 	public $password;
+	/** Name, unquoted string. */
+	public $name;
 	/** Birthdate, unquoted string in form (yyyy-mm-dd) or null. */
 	public $birthdate;
 	/** Gender, one of {null, "M", "F"}. */ 
@@ -26,12 +26,12 @@ class Person {
 	
 	/** Construct a person. Missing arguments are set to null. */
 	public function __construct(
-		$email = null, $name = null, $password = null, $birthdate = null,
+		$email = null, $password = null, $name = null, $birthdate = null,
 		$gender = null, $picture = null, $role = null
 	) {
 		$this->email = $email;
-		$this->name = $name;
 		$this->password = $password;
+		$this->name = $name;
 		$this->birthdate = $birthdate;
 		$this->gender = $gender;
 		$this->picture = $picture;
@@ -48,7 +48,7 @@ class Person {
 		
 		// Insert person
 		DB::$person->insert(array(
-			"'$this->email'", "'$this->name'", "'$this->password'",
+			"'$this->email'", "'$this->password'", "'$this->name'",
 			$birthdate, $gender, $picture
 		));
 		// Insert role
@@ -128,8 +128,8 @@ class Person {
 		
 		// Set object attributes
 		$person->email = $email;
-		$person->name = $data["name"];
 		$person->password = $data["password"];
+		$person->name = $data["name"];
 		$person->birthdate = $data["birthdate"];
 		$person->gender = $data["gender"];
 		$person->picture = $data["picture"];
