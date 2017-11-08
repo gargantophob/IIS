@@ -21,7 +21,7 @@ if(!empty($_SESSION["user"])) {
 }
 
 // Initialize the page
-$page = new Page();
+$page = new Page(0, false);
 $user = $error = "";
 
 /** Form processor. Check username and his password.
