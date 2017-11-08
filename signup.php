@@ -27,7 +27,7 @@ if(isset($_SESSION["user"])) {
 }
 
 // Initialize the page
-$page = new Page(1);
+$page = new Page();
 
 /** form to a block, so the element is surrounded by <div> element */
 function to_block($element, $classname = null) {

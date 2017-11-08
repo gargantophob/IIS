@@ -13,7 +13,7 @@ session_start();
 restrict_page_access();
 
 // Initialize the page
-$page = new Page(2);
+$page = new Page();
 
 // Construct a table
 $emails = Person::all();

@@ -28,7 +28,7 @@ function list_of_people($header, $people) {
 }
 
 // Initialize the page
-$page = new Page(0);
+$page = new Page();
 
 // Read source (session) and target
 $source = Person::look_up($_SESSION["user"]);

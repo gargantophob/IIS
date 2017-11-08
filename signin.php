@@ -20,8 +20,8 @@ if(!empty($_SESSION["user"])) {
 	redirect("profile.php");
 }
 
-// Initialize the page
-$page = new Page(0, false);
+// Initialize the page, not authorized -> false
+$page = new Page(false);
 $user = $error = "";
 
 /** Form processor. Check username and his password.

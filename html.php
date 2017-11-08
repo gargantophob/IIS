@@ -15,25 +15,17 @@ class Page {
     /** Authorized flag. */
     private $authorized;
 
-    /** Active item in menubar. */
-    private $active_idx;
-
     public function set_authorized($authorized) {
         $this->authorized = $authorized;
-    }
-
-    public function activate($idx) {
-        $active_idx = $idx;
     }
 
     /** Initialize the page.
      *  @param active_idx index of highlighted item in menubar
      *  @authorized state of navigation bar
      */
-    public function __construct($active_idx = -1, $authorized = true)
+    public function __construct($authorized = true)
     {
         $this->primitives = array();
-        $this->active_idx = $active_idx;
         $this->authorized = $authorized;
     }
 
@@ -52,10 +44,6 @@ class Page {
             $topnav->add(new Link('signin.php', 'signin'));
             $topnav->add(new Link('signup.php', 'signup'));
             $topnav->add(new Link('about.php', 'about'));
-        }
-
-        if (array_key_exists($this->active_idx, $topnav->childs)) {
-            $topnav->childs[$this->active_idx]->set('class', 'active');
         }
 
         return $topnav->html();
