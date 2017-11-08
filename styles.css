@@ -1,4 +1,63 @@
+/* layout stuff
+{{{*/
+* {
+box-sizing: border-box;
+}
+
+.column {
+    float:left;
+    padding:15px;
+}
+
+/* Left and right column */
+.column.side {
+    width: 10%;
+}
+
+/* Middle column */
+.column.middle {
+    width: 80%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media (max-width: 600px) {
+    .column.side, .column.middle {
+        width: 100%;
+    }
+}
+
+.topnav {
+    overflow: hidden;
+    background-color: #333333;
+}
+
+.topnav a {
+    float: left;
+    color: white;
+    padding: 14px 20px;
+    display: block;
+    text-decoration: none;
+}
+
+.topnav a.active {
+    background-color: navy;
+}
+
+.topnav a:hover:not(.active) {
+    background-color: black;
+}
+
+/* }}} */
+
 body {
+    margin: 0;
     background-color: silver;
 }
 
@@ -10,65 +69,3 @@ label {
 table, th, td {
     border: 1px solid black;
 }
-
-/* layout stuff
-{{{*/
-* {
-    box-sizing:border-box;
-}
-
-.header, .footer{
-    background-color: grey;
-    color: black;
-    padding: 15px;
-    text-align: center;
-}
-
-.column{
-    float:left;
-    padding:15px;
-}
-
-.clearfix::after{
-    content:"";
-    clear:both;
-    display:table;
-}
-
-.menu{
-    width:25%;
-    height:100%;
-}
-
-.content{
-    background-color:MediumSeaGreen;
-    padding: 3em;
-    width:75%;
-}
-
-.menu ul{
-    list-style-type:none;
-    margin:0;
-    padding:0;
-}
-
-.menu li{
-    padding:8px;
-    margin-bottom:8px;
-    background-color:#00cc44;
-    color:#ffffff;
-}
-
-.menu li:hover{
-    background-color: #00802b;
-}
-
-.menu li a {
-    color: white;
-    text-decoration:none;
-}
-
-.menu li a:hover {
-    color: orange;
-}
-/* }}} */

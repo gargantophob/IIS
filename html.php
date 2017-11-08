@@ -6,34 +6,47 @@
  * @author xsemri00
  */
 
-
-
 /** HTML page. */
 /** {{{ */
 class Page {
-    /** Global menubar element */
-    static private $global_menu =
-    '<div class="menu column">
-    <ul>
-        <li><a href="signup.php">signup</a></li>
-        <li><a href="signin.php">signin</a></li>
-    </ul></div>'
-    ;
-
     /** A collection of primitives. */
     private $primitives;
 
     /** Page header text. */
     private $header;
 
-    /** Page menu bar. */
-    private $menu;
+    /** Active item in menubar. */
+    private $active_idx;
 
-    /** Initialize the page. */
-    public function __construct($header = 'Some Header', $menu = null) {
-        $this->header = $header;
-        $this->menu =$menu == null ? self::$global_menu : $menu;
+    /** Initialize the page.
+     *  @param active_idx index of highlighted item in menubar
+     */
+    public function __construct($active_idx = 0)
+    {
         $this->primitives = array();
+        $this->active_idx = $active_idx;
+    }
+
+    public function menu() {
+        $topnav = new Block();
+        $topnav->set('class', 'topnav');
+        if (1) {
+            $topnav->add(new Link('signin.php', 'signin'));
+            $topnav->add(new Link('signup.php', 'signup'));
+            $topnav->add(new Link('about.php', 'about'));
+        }
+        else {
+            // XXX add correct links
+            $topnav->add(new Link('signin.php', 'my profile'));
+            $topnav->add(new Link('signin.php', 'sessions'));
+            $topnav->add(new Link('signin.php', 'people'));
+            $topnav->add(new Link('signin.php', 'log out'));
+        }
+
+        assert($this->active_idx < count($topnav->childs));
+        $topnav->childs[$this->active_idx]->set('class', 'active');
+
+        return $topnav->html();
     }
 
     /** Register a primitive.
@@ -52,24 +65,28 @@ class Page {
     public function html() {
         // Start the page
         $page = "<!DOCTYPE html> <html>";
+        $page = '<title>Alcoholics Assembly</title>';
 
         // Head + styles
-        $page .= '<head><link rel="stylesheet" href="styles.css"></head>';
+        $page .= '<head><link rel="stylesheet" href="styles.css">';
+//        $page .- '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">';
+        $page .= '</head>';
+        // adjust to smaller devices
+        // XXX doesn't work
+        $page .= '<meta name="viewport" content="width=device-width,
+        initial-scale=1">';
         // Body
         $page .= '<body>';
-
-        $page .= "<div class=\"header\"><h1>$this->header</h1></div>";
-        $page .= '<div class="clearfix">';
-
         // menu
-        $page .= $this->menu;
-        $page .= '<div class="content column">';
+        $page .= $this->menu();
+        $page .= '<div class="row">';
+        $page .= '<div class="column side"></div>';
+        $page .= '<div class="column middle">';
         foreach ($this->primitives as $primitive) {
             $page .= $primitive->html();
         }
-        $page .= "</div>";
-        $page .= "</div>";
-        $page .= '<div class="footer">IIS VUT FIT 2017</div>';
+        $page .= "</div>";  // content column ending tag
+        $page .= "</div>";  // row ending tag
         $page .= "</body>";
 
         // End the page
@@ -94,7 +111,12 @@ abstract class Primitive {
     protected $attributes;
 
     public function set($attribute, $value) {
-        $this->attributes[$attribute] = $value;
+        if (array_key_exists($value, $this->attributes)) {
+            $this->attributes[$attribute] .= " $value";
+        }
+        else {
+            $this->attributes[$attribute] = $value;
+        }
     }
 
     public function get($attribute, $value) {
@@ -120,7 +142,7 @@ abstract class Primitive {
 
 
 class Block extends Primitive {
-    private $childs;
+    public $childs;
 
     public function __construct() {
         // XXX inline (span)?
@@ -170,22 +192,19 @@ class Text extends Primitive {
 
 /** Hyperlink. */
 class Link extends Primitive {
-    /** Target URL. */
-    private $url;
     /** Link description. */
     private $description;
 
     /** Create a hyperlink. */
     public function __construct($url, $description) {
         parent::__construct();
-        $this->url = $url;
-        $this->description = $description;
+        $this->description = "$description";
+        $this->set('href', $url);
     }
 
     /** html() implementation. */
     public function html() {
-        return "<a " . $this->attr_html() .
-               " href='$this->url'>$this->description</a>";
+        return "<a " . $this->attr_html() . '>' . $this->description . '</a>';
     }
 }
 
@@ -375,6 +394,9 @@ class Table extends Primitive {
 
     /** html() implementation. */
     public function html() {
+        if (count($this->rows) == 1) {
+            return '</br>';
+        }
         $str = '<table>';
         $tag = 'th';
         foreach($this->rows as $row) {
