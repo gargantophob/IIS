@@ -78,9 +78,8 @@ function form_process() {
 
 	if(!$authorized) {
 		// Check email uniqueness
-		$person = Person::look_up($email);
-		if($person != null) {
-			$error = "User with this email already exists." . $person->name . $person->email . $person->password . $person->role;
+		if(Person::look_up($email) != null) {
+			$error = "User with this email already exists.";
 			return FALSE;
 		}
 	}
