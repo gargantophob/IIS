@@ -6,6 +6,10 @@
  * @author xandri03
  */
 
+// TODO html.php: navigation bar for different roles
+// TODO signup.php/html.php: required fields
+// TODO signup.php: picture context save
+
 require_once "library.php";
 require_once "entity.php";
 require_once "html.php";
@@ -13,13 +17,13 @@ require_once "html.php";
 session_start();
 
 // Redirect to profile page if already signed in.
-if(!empty($_SESSION["user"])) {
+if(isset($_SESSION["user"])) {
     $_SESSION["target"] = $_SESSION["user"];
     redirect("profile.php");
 }
 
 // Initialize the page
-$page = new Page(false);
+$page = new Page();
 $user = $error = "";
 
 /**

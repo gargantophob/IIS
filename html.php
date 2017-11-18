@@ -7,46 +7,42 @@
  * @author xsemri00
  */
 
-// TODO navigation bar for different pages
-
 /** HTML page. */
 /** {{{ */
 class Page {
     /** A collection of primitives. */
     private $primitives;
 
-    /** Authorized flag. */
-    private $authorized;
-
-    public function set_authorized($authorized) {
-        $this->authorized = $authorized;
-    }
+    /** User role, one of {'alcoholic', 'patron', 'expert', null}. */
+    private $role;
 
     /** Initialize the page.
      *  @param active_idx index of highlighted item in menubar
      *  @authorized state of navigation bar
      */
-    public function __construct($authorized = true)
-    {
+    public function __construct($role = null) {
         $this->primitives = array();
-        $this->authorized = $authorized;
+        $this->role = $role;
     }
 
+    /**
+     * TODO
+     */
     public function menu() {
         $topnav = new Block();
         $topnav->set('class', 'topnav');
-        if ($this->authorized) {
+        if ($this->role == null) {
+            $topnav->add(new Link('index.php', 'Main page'));
+            //$topnav->add(new Link('signup.php', 'signup'));
+            //$topnav->add(new Link('about.php', 'about'));
+        }
+        else {
             // XXX add correct links
             $topnav->add(new Link('index.php', 'my profile'));
             $topnav->add(new Link('signup.php', 'edit profile'));
             $topnav->add(new Link('members.php', 'people'));
             $topnav->add(new Link('session.php', 'sessions'));
             $topnav->add(new Link('index.php', 'log out'));
-        }
-        else {
-            $topnav->add(new Link('index.php', 'Main page'));
-            //$topnav->add(new Link('signup.php', 'signup'));
-            //$topnav->add(new Link('about.php', 'about'));
         }
 
         return $topnav->html();

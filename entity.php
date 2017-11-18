@@ -23,49 +23,45 @@ class Person {
     /** Picture (raw). */
     public $picture;
     /** Person role, one of {"alcoholic", "patron", "expert", null}. */
-    public $role;
+    public $role = null;
 
     /**
-     * Construct a person. Missing arguments are set to null.
+     * Replace data of this person with the ones from a database.
+     * @param email email of a person
      */
-    public function __construct(
-        $email = null, $password = null, $name = null, $birthdate = null,
-        $gender = null, $picture = null, $role = null
-    ) {
+    public function fill($email) {
+        // Look email up
+        $data = DB::$person->look_up("'$email'");
+        if($data == null) {
+            return;
+        }
+        
+        // Set object attributes
         $this->email = $email;
-        $this->password = $password;
-        $this->name = $name;
-        $this->birthdate = $birthdate;
-        $this->gender = $gender;
-        $this->picture = $picture;
-        $this->role = $role;
+        $this->password = $data["password"];
+        $this->name = $data["name"];
+        $this->birthdate = $data["birthdate"];
+        $this->gender = $data["gender"];
+        $this->picture = $data["picture"];
+        // role field is ignored
     }
-
+    
     /**
-     * Insert @c this as a new record in a person table.
+     * Insert this person as a new record in a person table.
      */
-    public function insert() {
+    protected function insert() {
         // Preprocess data
         $birthdate = isset($this->birthdate) ? "'$this->birthdate'" : "NULL";
         $gender = isset($this->gender) ? "'$this->gender'" : "NULL";
         $picture = isset($this->picture) ? $this->picture : "NULL";
         
         // Insert person
-        DB::$person->insert(array(
-            "'$this->email'", "'$this->password'", "'$this->name'",
-            $birthdate, $gender, $picture
-        ));
-        
-        // Insert role
-        $role = $this->role;
-        if($role == "alcoholic") {
-            $table = DB::$alcoholic;
-        } elseif($role == "patron") {
-            $table = DB::$patron;
-        } else {
-            $table = DB::$expert;
-        }
-        $table->insert(array("'$this->email'"));
+        DB::$person->insert(
+            array(
+                "'$this->email'", "'$this->password'", "'$this->name'",
+                $birthdate, $gender, $picture
+            )
+        );
     }
 
     /**
@@ -128,24 +124,16 @@ class Person {
         
         // Create an object
         if($table == DB::$alcoholic) {
-            $role = "alcoholic";
             $person = new Alcoholic();
         } elseif($table == DB::$patron) {
-            $role = "patron";
             $person = new Patron();
         } else {
-            $role = "expert";
             $person = new Expert();
+            $expert_data = DB::$expert->look_up("'$email'");
+            $person->education = $expert_data["education"];
+            $person->practice = $expert_data["practice"];
         }
-        
-        // Set object attributes
-        $person->email = $email;
-        $person->password = $data["password"];
-        $person->name = $data["name"];
-        $person->birthdate = $data["birthdate"];
-        $person->gender = $data["gender"];
-        $person->picture = $data["picture"];
-        $person->role = $role;
+        $person->fill($email);
         
         // Success
         return $person;
@@ -163,6 +151,21 @@ class Person {
 /** Alcoholic data. */
 class Alcoholic extends Person {
 
+    /**
+     * Construct an alcoholic.
+     */
+    public function Alcoholic() {
+        $this->role = "alcoholic";
+    }
+    
+    /**
+     * Insert this alcoholic as a new record in a table.
+     */
+    public function insert() {
+        Person::insert();
+        DB::$alcoholic->insert(array("'$this->email'"));
+    }
+    
     /**
      * List patrons that support this alcoholic.
      * @return  an array of emails (might me empty)
@@ -208,6 +211,21 @@ class Alcoholic extends Person {
 
 /** Patron data. */
 class Patron extends Person {
+    
+    /**
+     * Construct a patron.
+     */
+    public function Patron() {
+        $this->role = "patron";
+    }
+    
+    /**
+     * Insert this alcoholic as a new record in a table.
+     */
+    public function insert() {
+        Person::insert();
+        DB::$patron->insert(array("'$this->email'"));
+    }
 
     /**
      * List alcoholics supported by this expert.
@@ -253,6 +271,41 @@ class Patron extends Person {
 
 /** Expert data. */
 class Expert extends Person {
+    
+    /** Expert education. */
+    public $education;
+    /** Expert practice. */
+    public $practice;
+    
+    /**
+     * Construct an expert.
+     */
+    public function Expert() {
+        $this->role = "expert";
+    }
+    
+    /**
+     * Insert this alcoholic as a new record in a table.
+     */
+    public function insert() {
+        Person::insert();
+        DB::$expert->insert(
+            array("'$this->email'", "'$this->education'", "'$this->practice'")
+        );
+    }
+    
+    /**
+     * Update expert and person fields in a database.
+     */
+    public function update() {
+        Person::update();
+        DB::$expert->update(
+            array(
+                "'$this->email'", "'$this->education'", "'$this->practice'",
+            ),
+            "email='$this->email'"
+        );
+    }
 
     /**
      * List alcoholics supervised by this expert.

@@ -27,9 +27,6 @@ function list_of_people($header, $people) {
 	return $table;
 }
 
-// Initialize the page
-$page = new Page();
-
 // Read source (session) and target
 $source = Person::look_up($_SESSION["user"]);
 $target = $source;	// default target is the source
@@ -69,6 +66,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 		$source->drop($target->email);
 	}
 }
+
+// Initialize the page
+$page = new Page($source->role);
 
 // Log out button
 $form = new Form();
