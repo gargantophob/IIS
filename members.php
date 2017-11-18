@@ -42,10 +42,10 @@ $table = new Table();
 $table->add(array(new Text("Person"), new Text("Role")));
 foreach($emails as $email) {
     $person = Person::look_up($email);
-	$name = new Link("profile.php?target=$email", $person->name);
-	$role = new Text($person->role);
+    $name = new Link("profile.php?target=$email", $person->name);
+    $role = new Text($person->role);
     //$report = new Link("new_report.php?target=$email", "Report");
-	$table->add(array($name, $role));
+    $table->add(array($name, $role));
 }
 $page->add($table);
 
