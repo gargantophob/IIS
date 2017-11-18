@@ -10,9 +10,9 @@
  * Restrict page access to authorized users.
  */
 function restrict_page_access() {
-	if(empty($_SESSION["user"])) {
-		exit("You do not have permission to access this page.");
-	}
+    if(empty($_SESSION["user"])) {
+        exit("You do not have permission to access this page.");
+    }
 }
 
 /**
@@ -29,7 +29,7 @@ function redirect($url, $permanent = FALSE) {
  * Sanitize form input.
  */
 function sanitize($input) {
-	return htmlspecialchars(stripslashes(trim($input)));
+    return htmlspecialchars(stripslashes(trim($input)));
 }
 
 ?>
