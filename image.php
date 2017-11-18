@@ -4,7 +4,7 @@
  * Image container.
  * @author xandri03
  */
-require_once "person.php";
+require_once "entity.php";
 
 // Load the image using GET
 $picture = Person::look_up($_GET["user"])->picture;

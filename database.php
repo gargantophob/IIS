@@ -1,100 +1,79 @@
 <?php
 
-/** @file database.php
- * MySQL communication layer.
+/**
+ * @file database.php
+ * MySQL communication encapsulator.
  * @author xandri03
  */
 
 /** Database table interface. */
 class DBTable {
+	
+	// Private fields: attributes
+	
+	/** Table name. */
 	private $table;
+	/** Array of column names; first item is primary key. */
 	private $columns;
-	private $primary;
+	/** If true, primary key will be ommited when inserting. */
 	private $auto_increment = FALSE;
-	public function __construct($table, $columns) {
-		$this->table = $table;
-		$this->columns = $columns;
-		$this->primary = $columns[0];
-	}
-	public function auto_increment() {
-		$this->auto_increment = TRUE;
-	}
 	
-	public function select($what, $condition = null) {
-		return self::db_select(
-			"SELECT $what FROM $this->table WHERE $condition;"
+	// Private fields: SQL primitives.
+	
+	/**
+	 * Connect to database.
+	 * @return connection handler on success, exit on failure
+	 */
+	private static function db_connect() {
+		$db = new mysqli(
+			"localhost", "xandri03", "afekaj5n", "xandri03", null,
+			"/var/run/mysql/mysql.sock"
 		);
-	}
-	
-	public function look_up($key) {
-		$data = $this->select("*", "$this->primary=$key");
-		return $data != null ? self::db_next($data) : null;
-	}
-	
-	public function insert($values) {
-		$columns = "";
-		$data = "";
-		$first = TRUE;
-		for($i = 0; $i < count($this->columns); $i++) {
-			if($this->auto_increment === TRUE) {
-				if($this->columns[$i] == $this->primary) {
-					continue;
-				}
-			}
-			if($first === FALSE) {
-				$columns .= " , ";
-				$data .= " , ";
-			} else {
-				$first = FALSE;
-			}
-			$columns .= $this->columns[$i];
-			$data .= $values[$i];
+		if($db->connect_error) {
+			exit("Connect Error ($db->connect_errno) $db->connect_error");
 		}
-		
-		$query = "INSERT INTO $this->table ( $columns ) VALUES ( $data );";
-		return self::db_query($query);
-	}
-
-	public function update($values, $condition) {
-		$query = "UPDATE $this->table SET ";
-		$first = TRUE;
-		for($i = 0; $i < count($this->columns); $i++) {
-			if($first === FALSE) {
-				$query .= " , ";
-			} else {
-				$first = FALSE;
-			}
-			$query .= $this->columns[$i] . "=" . $values[$i];
-		}
-		$query .= " WHERE $condition";
-		return self::db_query($query);
+		return $db;
 	}
 	
-	public function delete($condition) {
-		return self::db_query("DELETE FROM " . $this->table . " WHERE " . $condition);
+	/**
+	 * Perform SQL query.
+	 * @param query SQL query
+	 * @return FALSE on failure, @c mysqli_result for SELECT queries and TRUE
+	 * otherwise.
+	 */
+	private static function db_query($query) {
+		return self::db_connect()->query($query);
 	}
 	
-	public static function join_select($key, $from, $on, $condition) {
-		$data = self::db_select(
-			"SELECT $key FROM $from ON $on WHERE $condition"
-		);
-		$records = array();
-		return self::set($records, $key);
-	}
-	
-	public function keyset($key = null) {
-		if($key == null) {
-			$key = $this->primary;
-		}
-		if($key == null) {
+	/**
+	 * Perform SQL SELECT query.
+	 * @param query SQL SELECT query
+	 * @return @c mysqli_result handler on successful search, null otherwise
+	 */
+	private static function db_select($query) {
+		$result = self::db_query($query);
+		if($result === FALSE || $result->num_rows == 0) {
 			return null;
 		}
-		$set = array();
-		$records = self::db_select("SELECT $key FROM $this->table");
-		return self::set($records, $key);
+		return $result;
+	}
+
+	/**
+	 * Fetch next row from a SELECT query result.
+	 * @param result instance of @c mysqli_result
+	 * @return next row (an associative array) or null on end of table
+	 */
+	private static function db_next($result) {
+		return $result->fetch_assoc();
 	}
 	
-	public static function set($data, $key) {
+	/**
+	 * Transform SQL records set to array of keys.
+	 * @param data table records, result of {@code db_query()}
+	 * @param key column name to extract
+	 * @return set of column values (might be empty)
+	 */
+	private static function keyset($data, $key) {
 		$records = array();
 		if($data != null) {
 			while($row = self::db_next($data)) {
@@ -104,47 +83,126 @@ class DBTable {
 		return $records;
 	}
 	
-	/** Connect to database.
-	 * @return connection handler on success, exit on failure
+	// Public fields: table primitives.
+	
+	/**
+	 * Construct a table.
+	 * @param table table name
+	 * @param columns list of column names; first item is the primary key
 	 */
-	public static function connect() {
-		$db = new mysqli(
-			"localhost", "xandri03", "afekaj5n", "xandri03", null,
-			"/var/run/mysql/mysql.sock"
+	public function __construct($table, $columns) {
+		$this->table = $table;
+		$this->columns = $columns;
+	}
+	
+	/**
+	 * Allow auto-incrementation.
+	 */
+	public function auto_increment() {
+		$this->auto_increment = TRUE;
+	}
+	
+	/**
+	 * Look up a concrete record.
+	 * @param key primary key value
+	 * @return table record (associative array) or null on failed search
+	 */
+	public function look_up($key) {
+		$data = $this->db_select(
+			"SELECT * FROM $this->table WHERE " . $this->columns[0] . "=" . $key
 		);
-		if($db->connect_error) {
-			exit("Connect Error (" . $db->connect_errno . ") "
-				. $db->connect_error
-			);
+		if($data != null) {
+			$data = self::db_next($data);
 		}
-		return $db;
+		return $data;
 	}
 	
-	/** Perform SQL query.
-	 * @return FALSE on failure, @c mysqli_result for SELECT queries and TRUE
-	 * otherwise.
+	/**
+	 * Perform table insertion.
+	 * @param values list of values, order is the same as @c columns; if
+	 * 		auto-increment was enabled, primary key may be arbitrary
 	 */
-	public static function db_query($query) {
-		return self::connect()->query($query);
-	}
-	
-	
-	/** Perform SQL SELECT query.
-	 * @return @c mysqli_result handler on successful search, null otherwise
-	 */
-	public static function db_select($query) {
-		$result = self::db_query($query);
-		if($result === FALSE || $result->num_rows == 0) {
-			return null;
+	public function insert($values) {
+		$columns = "";
+		$data = "";
+		$first = TRUE;
+		$i = $this->auto_increment ? 1 : 0;
+		
+		while($i < count($this->columns)) {
+			if($first === TRUE) {
+				$first = FALSE;
+			} else {
+				$columns .= " , ";
+				$data .= " , ";
+			}
+			$columns .= $this->columns[$i];
+			$data .= $values[$i];
+			$i++;
 		}
-		return $result;
+		
+		self::db_query(
+			"INSERT INTO $this->table ( $columns ) VALUES ( $data );"
+		);
 	}
 
-	/** Fetch next row from a SELECT query result.
-	 * @return next row (an associative array) or null on end of table
+	/**
+	 * Update table record.
+	 * @param values list of values in @c columns order
+	 * @param condition predicate over records to update
 	 */
-	public static function db_next($result) {
-		return $result->fetch_assoc();
+	public function update($values, $condition) {
+		$query = "UPDATE $this->table SET ";
+		$first = TRUE;
+		for($i = 0; $i < count($this->columns); $i++) {
+			if($first === TRUE) {
+				$first = FALSE;
+			} else {
+				$query .= " , ";
+			}
+			$query .= $this->columns[$i] . "=" . $values[$i];
+		}
+		$query .= " WHERE $condition";
+		self::db_query($query);
+	}
+	
+	/**
+	 * Delete table records.
+	 * @param condition predicate over records to delete
+	 */
+	public function delete($condition) {
+		self::db_query("DELETE FROM $this->table WHERE $condition");
+	}
+	
+	/**
+	 * Perform joint selection.
+	 * @param key		one column to select
+	 * @param from		table join expression
+	 * @param on		join condition
+	 * @param condition	select condition
+	 * @return 			array of records (might be empty)
+	 */
+	public static function join_select($key, $from, $on, $condition) {
+		$records = self::db_select(
+			"SELECT $key FROM $from ON $on WHERE $condition"
+		);
+		return self::keyset($records, $key);
+	}
+	
+	/**
+	 * Return all values of a column (keyset).
+	 * @param key column name; if null, primary key is used
+	 * @param condition predicate over records to select
+	 * @return set of keys (might be empty)
+	 */
+	public function select($key = null, $condition = null) {
+		if($key == null) {
+			$key = $this->columns[0];
+		}
+		$query = "SELECT $key FROM $this->table ";
+		if($condition != null) {
+			$query .= " WHERE $condition";
+		}
+		return self::keyset($this->db_select($query), $key);
 	}
 }
 
@@ -164,10 +222,12 @@ class DB {
 	public static $report;
 	public static $alcohol_reported;
 }
+
 DB::$person = new DBTable(
 	"person",
 	array("email", "password", "name", "birthdate", "gender", "picture")
 );
+
 DB::$alcoholic = new DBTable(
 	"alcoholic", array("email")
 );

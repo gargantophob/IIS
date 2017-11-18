@@ -1,28 +1,32 @@
 <?php
 
-/** @file library.php
- * Some useful procedures, mainly SQL primitives.
+/**
+ * @file library.php
+ * Some useful ancillary procedures.
  * @author xandri03
  */
  
-/** Restrict page access to authorized users. */
+/**
+ * Restrict page access to authorized users.
+ */
 function restrict_page_access() {
 	if(empty($_SESSION["user"])) {
 		exit("You do not have permission to access this page.");
 	}
 }
 
-/** Redirect to URL. */
-function redirect($url, $permanent = false) {
+/**
+ * Redirect to URL.
+ */
+function redirect($url, $permanent = FALSE) {
     if (!headers_sent()) {
-        header("Location: " . $url, true, ($permanent === true) ? 301 : 302);
+        header("Location: " . $url, TRUE, ($permanent === TRUE) ? 301 : 302);
     }
-    exit();
+    exit("Internal error.");
 }
 
-/** Sanitize form input.
- * @param input input string
- * @return sanitized string
+/**
+ * Sanitize form input.
  */
 function sanitize($input) {
 	return htmlspecialchars(stripslashes(trim($input)));

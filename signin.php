@@ -6,7 +6,7 @@
  */
 
 require_once "library.php";
-require_once "person.php";
+require_once "entity.php";
 require_once "html.php";
 
 session_start();
