@@ -16,7 +16,7 @@ class DBTable {
 	/** Array of column names; first item is primary key. */
 	private $columns;
 	/** If true, primary key will be ommited when inserting. */
-	private $auto_increment = FALSE;
+	private $auto_increment;
 	
 	// Private fields: SQL primitives.
 	
@@ -30,25 +30,26 @@ class DBTable {
 			"/var/run/mysql/mysql.sock"
 		);
 		if($db->connect_error) {
-			exit("Connect Error ($db->connect_errno) $db->connect_error");
+			exit("Connect Error ($db->connect_errno): $db->connect_error");
 		}
 		return $db;
 	}
 	
 	/**
-	 * Perform SQL query.
-	 * @param query SQL query
-	 * @return FALSE on failure, @c mysqli_result for SELECT queries and TRUE
-	 * otherwise.
+	 * Execute SQL query.
+	 * @param query	SQL query
+	 * @return 		FALSE on failure, @c mysqli_result for SELECT queries and
+	 * 				TRUE otherwise.
 	 */
 	private static function db_query($query) {
 		return self::db_connect()->query($query);
 	}
 	
 	/**
-	 * Perform SQL SELECT query.
-	 * @param query SQL SELECT query
-	 * @return @c mysqli_result handler on successful search, null otherwise
+	 * Execute SELECT query.
+	 * @param query	SELECT query
+	 * @return		@c mysqli_result handler on successful search, null
+	 * 				otherwise
 	 */
 	private static function db_select($query) {
 		$result = self::db_query($query);
@@ -60,18 +61,18 @@ class DBTable {
 
 	/**
 	 * Fetch next row from a SELECT query result.
-	 * @param result instance of @c mysqli_result
-	 * @return next row (an associative array) or null on end of table
+	 * @param result	instance of @c mysqli_result
+	 * @return 			next row (an associative array) or null on end of table
 	 */
 	private static function db_next($result) {
 		return $result->fetch_assoc();
 	}
 	
 	/**
-	 * Transform SQL records set to array of keys.
-	 * @param data table records, result of {@code db_query()}
-	 * @param key column name to extract
-	 * @return set of column values (might be empty)
+	 * Transform array of table records to a set of keys.
+	 * @param data	table records, result of {@code db_query()} (even null)
+	 * @param key	column name to extract
+	 * @return 		set of column values (might be empty)
 	 */
 	private static function keyset($data, $key) {
 		$records = array();
@@ -87,12 +88,13 @@ class DBTable {
 	
 	/**
 	 * Construct a table.
-	 * @param table table name
-	 * @param columns list of column names; first item is the primary key
+	 * @param table		table name
+	 * @param columns	list of column names; first item is the primary key
 	 */
 	public function __construct($table, $columns) {
 		$this->table = $table;
 		$this->columns = $columns;
+		$this->auto_increment = FALSE;
 	}
 	
 	/**
@@ -103,31 +105,31 @@ class DBTable {
 	}
 	
 	/**
-	 * Look up a concrete record.
-	 * @param key primary key value
-	 * @return table record (associative array) or null on failed search
+	 * Look up a concrete table record.
+	 * @param key	primary key value
+	 * @return		table record (associative array) or null on failed search
 	 */
 	public function look_up($key) {
 		$data = $this->db_select(
 			"SELECT * FROM $this->table WHERE " . $this->columns[0] . "=" . $key
 		);
-		if($data != null) {
-			$data = self::db_next($data);
+		if($data == null) {
+			return null;
+		} else {
+			return self::db_next($data);
 		}
-		return $data;
 	}
 	
 	/**
 	 * Perform table insertion.
-	 * @param values list of values, order is the same as @c columns; if
-	 * 		auto-increment was enabled, primary key may be arbitrary
+	 * @param values	list of values, order is the same as @c columns; if
+	 * 					auto-increment was enabled, primary key may be arbitrary
 	 */
 	public function insert($values) {
 		$columns = "";
 		$data = "";
 		$first = TRUE;
 		$i = $this->auto_increment ? 1 : 0;
-		
 		while($i < count($this->columns)) {
 			if($first === TRUE) {
 				$first = FALSE;
@@ -139,16 +141,14 @@ class DBTable {
 			$data .= $values[$i];
 			$i++;
 		}
-		
-		self::db_query(
-			"INSERT INTO $this->table ( $columns ) VALUES ( $data );"
-		);
+		$query = "INSERT INTO $this->table ( $columns ) VALUES ( $data ) ;";
+		self::db_query($query);
 	}
 
 	/**
 	 * Update table record.
-	 * @param values list of values in @c columns order
-	 * @param condition predicate over records to update
+	 * @param values	list of values, order is the same as @c columns
+	 * @param condition	predicate over records to update
 	 */
 	public function update($values, $condition) {
 		$query = "UPDATE $this->table SET ";
@@ -161,38 +161,38 @@ class DBTable {
 			}
 			$query .= $this->columns[$i] . "=" . $values[$i];
 		}
-		$query .= " WHERE $condition";
+		$query .= " WHERE $condition ;";
 		self::db_query($query);
 	}
 	
 	/**
 	 * Delete table records.
-	 * @param condition predicate over records to delete
+	 * @param condition	predicate over records to delete
 	 */
 	public function delete($condition) {
-		self::db_query("DELETE FROM $this->table WHERE $condition");
+		$query = "DELETE FROM $this->table WHERE $condition ;";
+		self::db_query($query);
 	}
 	
 	/**
 	 * Perform joint selection.
 	 * @param key		one column to select
 	 * @param from		table join expression
-	 * @param on		join condition
+	 * @param on		table join condition
 	 * @param condition	select condition
-	 * @return 			array of records (might be empty)
+	 * @return 			array of selected @c key values (might be empty)
 	 */
 	public static function join_select($key, $from, $on, $condition) {
-		$records = self::db_select(
-			"SELECT $key FROM $from ON $on WHERE $condition"
-		);
+		$query = "SELECT $key FROM $from ON $on WHERE $condition";
+		$records = self::db_select($query);
 		return self::keyset($records, $key);
 	}
 	
 	/**
 	 * Return all values of a column (keyset).
-	 * @param key column name; if null, primary key is used
-	 * @param condition predicate over records to select
-	 * @return set of keys (might be empty)
+	 * @param key		column name; if null, primary key is used
+	 * @param condition	predicate over records to select
+	 * @return 			set of keys (might be empty)
 	 */
 	public function select($key = null, $condition = null) {
 		if($key == null) {
@@ -202,7 +202,8 @@ class DBTable {
 		if($condition != null) {
 			$query .= " WHERE $condition";
 		}
-		return self::keyset($this->db_select($query), $key);
+		$records = self::db_select($query);
+		return self::keyset($records, $key);
 	}
 }
 
@@ -229,46 +230,56 @@ DB::$person = new DBTable(
 );
 
 DB::$alcoholic = new DBTable(
-	"alcoholic", array("email")
+	"alcoholic",
+	array("email")
 );
 
 DB::$patron = new DBTable(
-	"patron", array("email")
+	"patron",
+	array("email")
 );
 
 DB::$expert = new DBTable(
-	"expert", array("email")
+	"expert",
+	array("email", "education", "practice")
 );
 
 DB::$patron_supports = new DBTable(
-	"patron_supports", array("patron", "alcoholic")
+	"patron_supports",
+	array("patron", "alcoholic")
 );
 
 DB::$expert_supervises = new DBTable(
-	"expert_supervises", array("expert", "alcoholic")
+	"expert_supervises",
+	array("expert", "alcoholic")
 );
 
 DB::$meeting = new DBTable(
-	"meeting", array("id", "patron", "alcoholic", "date")
+	"meeting",
+	array("id", "patron", "alcoholic", "date")
 );
 DB::$meeting->auto_increment();
 
 DB::$place = new DBTable(
-	"place", array("id", "address")
+	"place",
+	array("id", "address")
 );
 DB::$place->auto_increment();
 
 DB::$session = new DBTable(
-	"session", array("id", "date", "place", "leader")
+	"session",
+	array("id", "date", "place", "leader")
 );
 DB::$session->auto_increment();
 
 DB::$person_attends = new DBTable(
-	"person_attends", array("email", "session")
+	"person_attends",
+	array("email", "session")
 );
 
 DB::$alcohol = new DBTable(
-	"alcohol", array("id", "type", "origin")
+	"alcohol",
+	array("id", "type", "origin")
 );
 DB::$alcohol->auto_increment();
 
@@ -279,7 +290,8 @@ DB::$report = new DBTable(
 DB::$report->auto_increment();
 
 DB::$alcohol_reported = new DBTable(
-	"alcohol_reported", array("alcohol", "report")
+	"alcohol_reported",
+	array("alcohol", "report")
 );
 
 ?>
