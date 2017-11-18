@@ -1,6 +1,7 @@
 <?php
 
-/** @file image.php
+/**
+ * @file image.php
  * Image container.
  * @author xandri03
  */
@@ -16,4 +17,5 @@ if($picture == null) {
 // Print image
 header("content-type:image/jpeg");
 echo($picture);
+
 ?>

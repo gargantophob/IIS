@@ -32,4 +32,12 @@ function sanitize($input) {
     return htmlspecialchars(stripslashes(trim($input)));
 }
 
+/**
+ * Date comparator.
+ * @return  TRUE if the date is in future.
+ */
+function is_future($date) {
+    return strtotime(date("Y-m-d")) <= strtotime($date);
+}
+
 ?>

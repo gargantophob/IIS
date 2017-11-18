@@ -186,13 +186,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         
         // Redirect to profile page
-        $_SESSION["user"] = $_SESSION["target"] = $email;
+        $_SESSION["user"] = $email;
         redirect("profile.php");
     }
 }
 
 // Initialize the page
-$page = new Page($authorized ? $role : null);
+$page = new Page();
 
 // Sign up form
 $form = new Form();

@@ -27,16 +27,15 @@ if($_SERVER["REQUEST_METHOD"] == "GET") {
 // Extract alcoholic, expert
 $alcoholic = $target == null ? "" : $target->email;
 $expert = $source->role == "expert" ? $source->email : null;
-$date = $bac = $alcohol = "";
+$bac = $alcohol = "";
 $error = "";
 
 function form_process() {
-	global $alcoholic, $expert, $date, $bac, $alcohol;
+	global $alcoholic, $expert, $bac, $alcohol;
 	global $error;
 	
 	// Collect data
 	$alcoholic = sanitize($_POST["alcoholic"]);
-	$date = sanitize($_POST["date"]);
 	$bac = sanitize($_POST["bac"]);
 	$alcohol = sanitize($_POST["alcohol"]);
 	
@@ -46,14 +45,6 @@ function form_process() {
 		$error = "Such alcoholic does not exist.";
 		return FALSE;
 	}
-	
-	// Check date format
-	$date = DateTime::createFromFormat("Y-m-d", $date);
-	if($date === FALSE) {
-		$error = "Wrong date format.";
-		return FALSE;
-	}
-	$date = $date->format("Y-m-d");
 	
 	// Check blood content
 	$value = floatval($bac);
@@ -76,9 +67,9 @@ function form_process() {
 if($_SERVER["REQUEST_METHOD"] == "POST") {
 	if(form_process() === TRUE) {
 		// Create a report
-		$report = new Report(-1, $date, $bac, $alcoholic, $expert);
+        $report = new Report(-1, date("Y-m-d"), $bac, $alcoholic, $expert);
 		$report->insert();
-		redirect("profile.php");
+		redirect("profile.php?target=$alcoholic");
 	}
 }
 
@@ -94,11 +85,6 @@ if($source->email == $alcoholic) {
 	$block->set("hidden", "true");
 }
 $form->add($block);
-
-// Date
-$input = new Input("text", "date", "Date:");
-$input->set("value", $date);
-$form->add($input);
 
 // BAC
 $input = new Input("text", "bac", "Blood content:");
@@ -122,7 +108,15 @@ $form->add_error($error);
 $page->add($form);
 
 // Alcohol cheat sheet
-$page->add(new Link("alcohol.php", "Alcohol cheat sheet"));
+$page->add(new Text("Alcohol types:"));
+$ids = Alcohol::all();
+$table = new Table();
+$table->add(array(new Text("Identifier"), new Text("Type"), new Text("Origin")));
+foreach($ids as $id) {
+	$record = Alcohol::look_up($id);
+	$table->add(array(new Text($id), new Text($record->type), new Text($record->origin)));
+}
+$page->add($table);
 
 // Render the page
 $page->render();

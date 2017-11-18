@@ -8,7 +8,12 @@
 
 // TODO html.php: navigation bar for different roles
 // TODO signup.php/html.php: required fields
+// TODO signup.php: textarea for experts
 // TODO signup.php: picture context save
+// TODO signup.php: profile deletion
+// TODO activity timer
+// TODO how to display tables?
+// TODO sessions/meetings sort
 
 require_once "library.php";
 require_once "entity.php";
@@ -16,9 +21,17 @@ require_once "html.php";
 
 session_start();
 
+// Log out redirections
+if($_SERVER["REQUEST_METHOD"] == "GET") {
+    if(isset($_GET["logout"])) {
+        session_unset();
+        session_destroy();
+        redirect("index.php");
+    }
+}
+
 // Redirect to profile page if already signed in.
 if(isset($_SESSION["user"])) {
-    $_SESSION["target"] = $_SESSION["user"];
     redirect("profile.php");
 }
 
@@ -47,7 +60,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     // Process the form
     if(form_process() === TRUE) {
         // Authentication success
-        $_SESSION["user"] = $_SESSION["target"] = $user;
+        $_SESSION["user"] = $user;
         redirect("profile.php");
     }
     

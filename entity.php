@@ -84,6 +84,27 @@ class Person {
     }
 
     /**
+     * List sessions.
+     */
+    public function sessions() {
+        return DB::$person_attends->select("session", "email = '$this->email'");
+    }
+    
+    /**
+     * List future sessions starting from the earliest one.
+     */
+    public function future_sessions() {
+        $sessions = $this->sessions();
+        $result = array();
+        foreach($sessions as $session) {
+            if(is_future(Session::look_up($session)->date)) {
+                array_push($result, $session);
+            }
+        }
+        return $result;
+    }
+    
+    /**
      * Enroll a session.
      */
     public function enroll($session) {

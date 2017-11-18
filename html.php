@@ -7,22 +7,20 @@
  * @author xsemri00
  */
 
+require_once "entity.php";
+
 /** HTML page. */
 /** {{{ */
 class Page {
     /** A collection of primitives. */
     private $primitives;
 
-    /** User role, one of {'alcoholic', 'patron', 'expert', null}. */
-    private $role;
-
     /** Initialize the page.
      *  @param active_idx index of highlighted item in menubar
      *  @authorized state of navigation bar
      */
-    public function __construct($role = null) {
+    public function __construct() {
         $this->primitives = array();
-        $this->role = $role;
     }
 
     /**
@@ -31,18 +29,41 @@ class Page {
     public function menu() {
         $topnav = new Block();
         $topnav->set('class', 'topnav');
-        if ($this->role == null) {
-            $topnav->add(new Link('index.php', 'Main page'));
-            //$topnav->add(new Link('signup.php', 'signup'));
-            //$topnav->add(new Link('about.php', 'about'));
+        $source = null;
+        if(isset($_SESSION["user"])) {
+            $source = Person::look_up($_SESSION["user"]);
+        }
+        if ($source == null) {
+            $topnav->add(new Link("index.php", "Main page"));
         }
         else {
-            // XXX add correct links
-            $topnav->add(new Link('index.php', 'my profile'));
-            $topnav->add(new Link('signup.php', 'edit profile'));
-            $topnav->add(new Link('members.php', 'people'));
-            $topnav->add(new Link('session.php', 'sessions'));
-            $topnav->add(new Link('index.php', 'log out'));
+            // TODO
+            $topnav->add(new Link("profile.php", "My profile"));
+            $topnav->add(new Link("signup.php", "Edit profile"));
+            $topnav->add(new Link("sessions.php", "Sessions"));
+            if($source->role == "alcoholic") {
+                $topnav->add(
+                    new Link("members.php?type=patrons", "My patrons")
+                );
+                $topnav->add(
+                    new Link("members.php?type=experts", "My experts")
+                );
+                $topnav->add(
+                    new Link(
+                        "new_report.php?target=$source->email", "New report"
+                    )
+                );
+            } else {
+                $topnav->add(
+                    new Link("members.php?type=alcoholics", "My alcoholics")
+                );
+                $topnav->add(
+                    new Link("members.php?type=alcoholics", "Reports")
+                );
+            }
+
+            $topnav->add(new Link("members.php", "AA members"));
+            $topnav->add(new Link("index.php?logout=yes", "Log out"));
         }
 
         return $topnav->html();

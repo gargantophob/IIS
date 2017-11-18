@@ -1,6 +1,7 @@
 <?php
 
-/** @file profile.php
+/**
+ * @file profile.php
  * Profile page.
  * @author xandri03
  */
@@ -12,86 +13,49 @@ require_once "html.php";
 session_start();
 restrict_page_access();
 
-/** Create a list of people.
- * @param header table header
- * @param people array of emails
- */
-function list_of_people($header, $people) {
-	$table = new Table(array(new Text($header)));
-	foreach($people as $person) {
-		// Create a link
-		$link = new Link("profile.php?target=$person", Person::look_up($person)->name);
-		// Add a row
-		$table->add(array($link));
-	}
-	return $table;
-}
-
 // Read source (session) and target
 $source = Person::look_up($_SESSION["user"]);
-$target = $source;	// default target is the source
+$target = $source;  // default target is the source
+
+// Manual redirections
 if($_SERVER["REQUEST_METHOD"] == "GET") {
-	if(isset($_GET["target"])) {
-		$target = Person::look_up($_GET["target"]);
-	}
-	if(isset($_GET["date"])) {
-		// Meet  the target
-		$source->meet($target->email, $_GET["date"]);
-		redirect("profile.php?target=$target->email");
-	}
+    if(isset($_GET["target"])) {
+        $target = Person::look_up($_GET["target"]);
+    }
+    if(isset($_GET["date"])) {
+        // Meet the target
+        $source->meet($target->email, $_GET["date"]);
+        redirect("profile.php?target=$target->email");
+    }
 }
 
 // Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-	// Extract hidden target
-	$target = Person::look_up($_POST["target"]);
-	
-	// Differentiate buttons
-	if(isset($_POST["log_out"])) {
-		// Log out
-		session_unset();
-		session_destroy();
-		redirect("index.php");
-	}
-	if(isset($_POST["edit"])) {
-		// Edit profile
-		redirect("signup.php");
-	}
-	if(isset($_POST["support_start"])) {
-		// Start supporting
-		$source->support($target->email);
-	}
-	if(isset($_POST["support_stop"])) {
-		// Stop supporting
-		$source->drop($target->email);
-	}
+    // Extract hidden target
+    $target = Person::look_up($_POST["target"]);
+
+    // Differentiate buttons
+    if(isset($_POST["support_start"])) {
+        $source->support($target->email);
+    }
+    if(isset($_POST["support_stop"])) {
+        $source->drop($target->email);
+    }
 }
 
 // Initialize the page
-$page = new Page($source->role);
-
-// Log out button
-$form = new Form();
-
-// Log out button
-$input = new Input("submit", "log_out");
-$input->set("value", "Log out");
-$form->add($input);
-
-// Form complete
-$page->add($form);
-$page->newline();
+$page = new Page();
 
 // Preprocess some target data
 $birthdate = $target->birthdate;
 if($birthdate == null) {
-	$birthdate = "?";
+    $birthdate = "?";
 }
 $gender = $target->gender;
 if($gender == null) {
-	$gender = "?";
+    $gender = "?";
 } else {
-	$gender = $gender == "M" ? "Male" : "Female";
+    $gender = $gender == "M" ? "Male" : "Female";
 }
 
 // Print general data
@@ -107,55 +71,112 @@ $page->add(new Text("Role: " . $target->role));
 $page->newline();
 $page->add(new Image("image.php?user=$target->email"));
 $page->newline();
+$page->newline();
 
 // Pick a correct possessive adjective
 if($source == $target) {
-	$pa = "Your";
+    $pa = "Your";
 } elseif($target->gender == "F") {
-	$pa =  "Her";
+    $pa =  "Her";
 } else {
-	$pa = "His";
+    $pa = "His";
 }
 
-// Print specific data
+if($source == $target) {
+    // List future sessions
+    $sessions = $source->future_sessions();
+    if(count($sessions) == 0) {
+        $page->add(new Text("No upcoming sessions: "));
+        $page->add(new Link("sessions.php", "find one."));
+    } else {
+        $page->add(new Text("Upcoming sessions:"));
+        $table = new Table(
+            array(new Text("Date"), new Text(""))
+        );
+        foreach($sessions as $session) {
+            $session = Session::look_up($session);
+            $date = new Text($session->date);
+            $link = new Link(
+                "session.php?session=$session->id", "more info..."
+            );
+            $table->add(array($date, $link));
+        }
+        $page->add($table);
+    }
+    $page->newline();
+    $page->newline();
+        
+    // List future meetings
+    if($source->role != "expert") {
+        $meetings = $source->meetings();
+        if(count($meetings) == 0) {
+            $page->add(new Text("No upcoming meetings: "));
+            $page->add(new Link("members.php?type=patrons", "suggest one."));
+        } else {
+            $page->add(new Text("Upcoming meetings:"));
+            $table = new Table(array(new Text("Patron"), new Text("Date")));
+            foreach($meetings as $meeting) {
+                $meeting = Meeting::look_up($meeting);
+                if(!is_future($meeting->date)) {
+                    continue;
+                }
+                if($source->role == "alcoholic") {
+                    $person = $meeting->patron;
+                } else {
+                    $person = $meeting->alcoholic;
+                }
+                $link = new Link(
+                    "profile.php?target=$person", Person::look_up($person)->name
+                );
+                $date = new Text($meeting->date);
+                $table->add(array($link, $date));
+            }
+            $page->add($table);
+        }
+        $page->newline();
+        $page->newline();
+    }
+}
+
+// List reports and statistics
 if($target->role == "alcoholic") {
-	// Patrons
-	$page->add(list_of_people("$pa patrons:", $target->patrons()));
-	// Experts
-	$page->add(list_of_people("$pa experts:", $target->experts()));
-} else {
-	// Alcoholics
-	$page->add(list_of_people("$pa alcoholics:", $target->alcoholics()));
+    $reports = $target->reports();
+    $page->add(new Text("$pa reports and statistics:"));
+    $table = new Table(array(
+        new Text("Date"), new Text("BAC"), new Text("Reported by")
+    ));
+    foreach($reports as $report) {
+        $report = Report::look_up($report);
+        $date = new Text($report->date);
+        $bac = new Text($report->bac);
+        $reporter = $report->expert;
+        if($reporter == null) {
+            $reporter = new Text("Self-reported");
+        } else {
+            $reporter = Person::look_up($reporter);
+            $reporter = new Link(
+                "profile.php?target=$reporter->email", $reporter->name
+            );
+        }
+        $table->add(array(
+            $date, $bac, $reporter
+        ));
+    }
+    $page->add($table);	
+    $page->newline();
 }
-
-// List meetings
-if($source == $target && $source->role != "expert") {
-	$meetings = $source->meetings();
-	$page->add(new Text("Your meetings:"));
-	$table = new Table(array(new Text("Patron"), new Text("Date")));
-	foreach($meetings as $meeting) {
-		$meeting = Meeting::look_up($meeting);
-		$person = $source->role == "alcoholic" ? $meeting->patron : $meeting->alcoholic;
-		$link = new Link(
-			"profile.php?target=$person", Person::look_up($person)->name
-		);
-		$date = new Text($meeting->date);
-		$table->add(array($link, $date));
-	}
-	$page->add($table);	
-}
-
+    
 // A bunch of buttons
 $form = new Form();
 
-// Hidden target parameter for POST transitions
+// Hidden target email parameter for POST transitions
 $input = new Input("text", "target");
 $input->set("id", "target");
 $input->set("value", $target->email);
 $input->set("hidden", "true");
 $form->add($input);
 
-// Hidden name parameter for JS
+// Hidden target name parameter for JS
 $input = new Input("text", "name");
 $input->set("id", "name");
 $input->set("value", $target->name);
@@ -163,88 +184,51 @@ $input->set("hidden", "true");
 $form->add($input);
 
 // Buttons
-if($target == $source) {
-	// Edit profile button
-	$input = new Input("submit", "edit");
-	$input->set("value", "Edit profile");
-	$form->add($input);
-	
-	if($source->role == "alcoholic") {
-		// List reports
-		$reports = $source->reports();
-		$page->add(new Text("Your reports:"));
-		$table = new Table(array(
-			new Text("Date"), new Text("BAC"), new Text("Reported by")
-		));
-		foreach($reports as $report) {
-			$report = Report::look_up($report);
-			$date = new Text($report->date);
-			$bac = new Text($report->bac);
-			$reporter = $report->expert;
-			if($reporter == null) {
-				$reporter = new Text("Self-reported");
-			} else {
-				$reporter = Person::look_up($reporter);
-				$reporter = new Link(
-					"profile.php?target=$reporter->email", $reporter->name
-				);
-			}
-			$table->add(array(
-				$date, $bac, $reporter
-			));
-		}
-		$page->add($table);	
-	}
-} else {
-	// Support start/drop buttons
-	if($source->role != "alcoholic" && $target->role == "alcoholic") {
-		if(array_search($target->email, $source->alcoholics()) !== FALSE) {
-			// Support stop button
-			$input = new Input("submit", "support_stop");
-			$input->set("value", "Stop supporting");
-			$form->add($input);
-		} else {
-			// Support start button
-			$input = new Input("submit", "support_start");
-			$input->set("value", "Start supporting");
-			$form->add($input);
-		}
-	}
-	
-	// Create an appointment button
-	if(
-		(
-			$source->role == "alcoholic"
-			&& array_search($target->email, $source->patrons()) !== FALSE
-		) || (
-			$source->role == "patron"
-			&& array_search($target->email, $source->alcoholics()) !== FALSE
-		)
-	) {
-		$input = new Input("button", "meet");
-		$input->set("id", "meet");
-		$input->set("value", "Meet");
-		$form->add($input);
-	}
+if($target != $source) {
+    // Support start/drop buttons
+    if($source->role != "alcoholic" && $target->role == "alcoholic") {
+        if(array_search($target->email, $source->alcoholics()) !== FALSE) {
+            // Support stop button
+            $input = new Input("submit", "support_stop");
+            $input->set("value", "Stop supporting");
+            $form->add($input);
+        } else {
+            // Support start button
+            $input = new Input("submit", "support_start");
+            $input->set("value", "Start supporting");
+            $form->add($input);
+        }
+    }
+
+    // Create an appointment button
+    if(
+        (
+            $source->role == "alcoholic"
+            && array_search($target->email, $source->patrons()) !== FALSE
+        ) || (
+            $source->role == "patron"
+            && array_search($target->email, $source->alcoholics()) !== FALSE
+        )
+    ) {
+        $input = new Input("button", "meet");
+        $input->set("id", "meet");
+        $input->set("value", "Meet");
+        $form->add($input);
+    }
 }
 $page->add($form);
-$page->newline();
 
-// All members page
-$page->add(new Link("members.php", "All members of Anonymous Alcoholics"));
-$page->newline();
-
-// All sessions page
-$page->add(new Link("sessions.php", "All sessions"));
-$page->newline();
-
-// Report page
+// Report button
 if(
-	($source == $target && $source->role == "alcoholic")
-	|| ($source->role == "expert" && $target->role == "alcoholic")
+    ($source == $target && $source->role == "alcoholic")
+    || ($source->role == "expert" && $target->role == "alcoholic")
 ) {
-	$page->add(new Link("new_report.php?target=$target->email", "Report alcohol consumption"));
-	$page->newline();
+    $page->add(
+        new Link(
+            "new_report.php?target=$target->email", "Report alcohol consumption"
+        )
+    );
+    $page->newline();
 }
 
 // Render the page
@@ -253,29 +237,31 @@ $page->render();
 ?>
 
 <script>
-var meet = document.getElementById("meet");
-meet.onclick = function() {
-	var name = document.getElementById("name").value;
-	var email = document.getElementById("target").value;
-	var dateStr;
-	while(true) {
-		dateStr = prompt(
-			"When would you like to meet " + name + "? (yyyy-mm-dd)", ""
-		);
-		if(dateStr == null) {
-			// Cancel
-			break;
-		}
-		var date = new Date(dateStr);
-		var year = date.getFullYear();
-		var month = eval(date.getMonth())+1;
-		var day = date.getDate();
-		if(!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-			// Success
-			window.location.replace(
-				"profile.php?target=" + email + "&date=" + dateStr
-			);
-		}
-	}
+
+// Set 'meet' button callback
+document.getElementById("meet").onclick = function() {
+    var name = document.getElementById("name").value;
+    var email = document.getElementById("target").value;
+    var dateStr;
+    while(true) {
+        dateStr = prompt(
+            "When would you like to meet " + name + "? (yyyy-mm-dd)", ""
+        );
+        if(dateStr == null) {
+            // Cancel
+            break;
+        }
+        var date = new Date(dateStr);
+        var year = date.getFullYear();
+        var month = eval(date.getMonth())+1;
+        var day = date.getDate();
+        if(!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+            // Success
+            window.location.replace(
+                "profile.php?target=" + email + "&date=" + dateStr
+            );
+        }
+    }
 }
+
 </script>
