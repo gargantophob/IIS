@@ -1,6 +1,7 @@
 <?php
 
-/** @file signup.php
+/**
+ * @file signup.php
  * Sign up (profile edit) page.
  * @author xandri03
  */

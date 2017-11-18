@@ -54,7 +54,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 		// Log out
 		session_unset();
 		session_destroy();
-		redirect("signin.php");
+		redirect("index.php");
 	}
 	if(isset($_POST["edit"])) {
 		// Edit profile

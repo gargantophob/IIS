@@ -1,10 +1,13 @@
 <?php
 
-/** @file html.php
+/**
+ * @file html.php
  * HTML generator.
  * @author xandri03
  * @author xsemri00
  */
+
+// TODO navigation bar for different pages
 
 /** HTML page. */
 /** {{{ */
@@ -34,16 +37,16 @@ class Page {
         $topnav->set('class', 'topnav');
         if ($this->authorized) {
             // XXX add correct links
-            $topnav->add(new Link('signin.php', 'my profile'));
+            $topnav->add(new Link('index.php', 'my profile'));
             $topnav->add(new Link('signup.php', 'edit profile'));
             $topnav->add(new Link('members.php', 'people'));
             $topnav->add(new Link('session.php', 'sessions'));
-            $topnav->add(new Link('signin.php', 'log out'));
+            $topnav->add(new Link('index.php', 'log out'));
         }
         else {
-            $topnav->add(new Link('signin.php', 'signin'));
-            $topnav->add(new Link('signup.php', 'signup'));
-            $topnav->add(new Link('about.php', 'about'));
+            $topnav->add(new Link('index.php', 'Main page'));
+            //$topnav->add(new Link('signup.php', 'signup'));
+            //$topnav->add(new Link('about.php', 'about'));
         }
 
         return $topnav->html();
