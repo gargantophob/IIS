@@ -282,6 +282,11 @@ class Input extends Primitive {
     }
 }
 
+/** Text area: a special input. */
+class Textarea extends Input {
+    // TODO
+}
+
 /** Select: a special input. */
 class Select extends Input {
     /** List of options. */

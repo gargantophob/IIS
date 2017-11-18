@@ -82,26 +82,12 @@ class Person {
             "email='$this->email'"
         );
     }
-
-    /**
-     * List sessions.
-     */
-    public function sessions() {
-        return DB::$person_attends->select("session", "email = '$this->email'");
-    }
     
     /**
      * List future sessions starting from the earliest one.
      */
     public function future_sessions() {
-        $sessions = $this->sessions();
-        $result = array();
-        foreach($sessions as $session) {
-            if(is_future(Session::look_up($session)->date)) {
-                array_push($result, $session);
-            }
-        }
-        return $result;
+        return Session::future_sessions_of($this->email);
     }
     
     /**
@@ -513,6 +499,49 @@ class Session {
      */
     public static function all() {
         return DB::$session->select();
+    }
+    
+    /**
+     * Look up all sessions of a person. 
+     * @param email person to look up
+     * @return      array of session identifiers (might be empty)
+     */
+    public static function sessions_of($email) {
+        return DB::$person_attends->select("session", "email = '$email'");
+    }
+    
+    /**
+     * Look up all future sessions of a person.
+     * @param email person to look up
+     * @return      sorted array of upcoming session identifiers
+     *              (might be empty)
+     */
+    public static function future_sessions_of($email) {
+        // Find all sessions
+        $sessions = self::sessions_of($email);
+        
+        // Filter only future ones
+        $unsorted = array();
+        foreach($sessions as $session) {
+            $date = self::look_up($session)->date;
+            if(is_future($date)) {
+                $unsorted[$session] = strtotime($date);
+            }
+        }
+        
+        
+        // Sort
+        asort($unsorted);
+        
+        // Extract keys
+        $sorted = array();
+        foreach($unsorted as $key => $value) {
+            array_push($sorted, $key);
+        }
+
+        // Success
+        return $sorted;
+        
     }
 }
 

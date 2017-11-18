@@ -6,7 +6,6 @@
  * @author xandri03
  */
 
-// TODO html.php: navigation bar for different roles
 // TODO signup.php/html.php: required fields
 // TODO signup.php: textarea for experts
 // TODO signup.php: picture context save
