@@ -25,44 +25,44 @@ $page->newline();
 $page->newline();
 
 // List upcoming sessions
-$sessions = $source->future_sessions();
-if(count($sessions) != 0) {
+$my_sessions = $source->future_sessions();
+if(count($my_sessions) != 0) {
     $page->add(new Text("Upcoming sessions:"));
     $table = new Table(
         array(
-            new Text("Address"), new Text("Date"),
+            new Text("Date"), new Text("Where"),
             new Text("Leader"), new Text("")
         )
     );
-    foreach($sessions as $session) {
+    foreach($my_sessions as $session) {
         $session = Session::look_up($session);
-        $address = new Text(Place::look_up($session->place)->address);
         $date = new Text($session->date);
+        $address = new Text(Place::look_up($session->place)->address);
         $leader = Person::look_up($session->leader);
         $leader_link = new Link("profile.php?target=$leader->email", $leader->name);
         $id_link = new Link("session.php?session=$session->id", "more info...");
-        $table->add(array($address, $date, $leader_link, $id_link));
+        $table->add(array($date, $address, $leader_link, $id_link));
     }
     $page->add($table);
 }
 $page->newline();
 
-// List all sessions
-$page->add(new Text("All sessions:"));
-$sessions = Session::all();
+// List other upcoming sessions
+$page->add(new Text("Other sessions:"));
+$sessions = array_diff(Session::all(), $my_sessions);
 $table = new Table(
     array(
-        new Text("Address"), new Text("Date"), new Text("Leader"), new Text("")
+        new Text("Date"), new Text("Where"), new Text("Leader"), new Text("")
     )
 );
 foreach($sessions as $session) {
     $session = Session::look_up($session);
-    $address = new Text(Place::look_up($session->place)->address);
     $date = new Text($session->date);
+    $address = new Text(Place::look_up($session->place)->address);
     $leader = Person::look_up($session->leader);
     $leader_link = new Link("profile.php?target=$leader->email", $leader->name);
     $id_link = new Link("session.php?session=$session->id", "more info...");
-    $table->add(array($address, $date, $leader_link, $id_link));
+    $table->add(array($date, $address, $leader_link, $id_link));
 }
 $page->add($table);
 $page->newline();

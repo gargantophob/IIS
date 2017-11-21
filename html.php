@@ -37,10 +37,10 @@ class Page {
             $topnav->add(new Link("index.php", "Main page"));
         }
         else {
-            // TODO
+            // Everybody can see his profile
             $topnav->add(new Link("profile.php", "My profile"));
-            $topnav->add(new Link("signup.php", "Edit profile"));
-            $topnav->add(new Link("sessions.php", "Sessions"));
+            
+            // Alcoholics can see patrons and experts and can report themselves
             if($source->role == "alcoholic") {
                 $topnav->add(
                     new Link("members.php?type=patrons", "My patrons")
@@ -53,17 +53,30 @@ class Page {
                         "new_report.php?target=$source->email", "New report"
                     )
                 );
-            } else {
+            }
+            
+            // Patrons and experts see alcoholics
+            if($source->role == "patron" || $source->role == "expert") {
                 $topnav->add(
                     new Link("members.php?type=alcoholics", "My alcoholics")
                 );
+            }
+            
+            // Experts can report
+            if($source->role == "expert") {
                 $topnav->add(
-                    new Link("members.php?type=alcoholics", "Reports")
+                    new Link(
+                        "members.php?type=alcoholics", "New report"
+                    )
                 );
             }
 
+            // Everybody can see sessions and AA members, can edit profile or
+            // logout
+            $topnav->add(new Link("sessions.php", "Sessions"));
             $topnav->add(new Link("members.php", "AA members"));
-            $topnav->add(new Link("index.php?logout=yes", "Log out"));
+            $topnav->add(new Link("signup.php", "Edit profile"));
+            $topnav->add(new Link("index.php?logout=yes", "Logout"));
         }
 
         return $topnav->html();
@@ -206,7 +219,7 @@ class Text extends Primitive {
 
     /** html() implementation. */
     public function html() {
-        return "<span>$this->data</span>";
+        return "<span " . $this->attr_html() . " >$this->data</span>";
     }
 }
 
@@ -253,17 +266,23 @@ class Input extends Primitive {
     protected $name;
     /** Input element label (optional). */
     protected $label;
-    /** Additional attributes (optional). */
-    protected $attributes;
-
+    /** Required field flag. */
+    protected $required;
+    
     /** Construct a form input. */
     public function __construct($type, $name, $label = null) {
         parent::__construct();
         $this->type = $type;
         $this->name = $name;
         $this->label = $label;
+        $this->required = FALSE;
     }
 
+    /** Set required. */
+    public function required() {
+        $this->required = TRUE;
+    }
+    
     /** html() implementation. */
     public function html() {
         $str = '';
@@ -277,6 +296,11 @@ class Input extends Primitive {
         $str .= $this->attr_html();
         $str .=  "/>";
 
+        // Required star
+        if($this->required) {
+            $str .= "<span style='color:red'>*</span>";
+        }
+        
         // Success
         return $str;
     }

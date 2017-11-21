@@ -6,12 +6,14 @@
  * @author xandri03
  */
 
-// TODO signup.php/html.php: required fields
-// TODO signup.php: textarea for experts
-// TODO signup.php: picture context save
-// TODO signup.php: profile deletion
-// TODO activity timer
-// TODO how to display tables?
+// primary TODOs:
+// activity timer
+
+// additional TODOs:
+// html.php: fancy tables
+// html.php: fancy forms
+// signup.php/html.php: textarea for experts
+// signup.php: picture context save
 
 require_once "library.php";
 require_once "entity.php";
@@ -22,9 +24,7 @@ session_start();
 // Log out redirections
 if($_SERVER["REQUEST_METHOD"] == "GET") {
     if(isset($_GET["logout"])) {
-        session_unset();
-        session_destroy();
-        redirect("index.php");
+        logout();
     }
 }
 

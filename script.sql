@@ -114,7 +114,7 @@ INSERT INTO person (email, password, name, birthdate, gender, picture) VALUES
 	('hanks@a.a', 'a', 'Tom Hanks', NULL, NUll, NULL),
 	('hepburn@a.a', 'a', 'Audrey Hepburn' , NULL, NUll, NULL),
 	('lubezki@a.a', 'a', 'Emmanuel Lubezki' , NULL, NUll, NULL),
-	('niro@a.a', 'a', 'Robert de Nito' , NULL, NUll, NULL),
+	('niro@a.a', 'a', 'Robert de Niro' , NULL, NUll, NULL),
 	('nolan@a.a', 'a', 'Christopher Nolan' , NULL, NUll, NULL),
 	('oldman@a.a', 'a', 'Gary Oldman' , NULL, NUll, NULL),
 	('otoole@a.a', 'a', 'Peter OToole' , NULL, NUll, NULL),

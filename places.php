@@ -33,7 +33,7 @@ $table = new Table();
 $table->add(array(new Text("Address")));
 foreach($places as $place) {
 	$place = Place::look_up($place);
-	$address = new Link("new_session.php?place=$place->id", $place->address);
+	$address = new Link("date_selector.php?regime=session&target=$place->id", $place->address);
 	$table->add(array($address));
 }
 $page->add($table);
@@ -45,6 +45,7 @@ $input->set("value", "Add new place");
 $form->add($input);
 
 $page->add($form);
+
 // Render the page
 $page->render();
 

@@ -15,16 +15,22 @@ function redirect($url, $permanent = FALSE) {
     }
     exit("Internal error.");
 }
- 
+
+/**
+ * Log out; @c session_start() must have been called before.
+ */
+function logout() {
+    session_unset();
+    session_destroy();
+    redirect("index.php");
+}
+
 /**
  * Restrict page access to authorized users.
  */
 function restrict_page_access() {
     if(empty($_SESSION["user"])) {
-        session_unset();
-        session_destroy();
-        redirect("index.php");
-        //exit("You do not have permission to access this page.");
+        logout();
     }
 }
 

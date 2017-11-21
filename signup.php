@@ -143,9 +143,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     if(isset($_POST["delete"])) {
         $person = Person::look_up($email);
         $person->delete();
-        session_unset();
-        session_destroy();
-        redirect("index.php");
+        logout();
     } elseif(form_process() === TRUE) {
         // Preprocess input data
         if($gender == "") {
@@ -209,12 +207,14 @@ $form->set("enctype", "multipart/form-data");
 $input = new Input("text", "name", "Name:");
 $input->set("maxlength", "64");
 $input->set("value", $name);
+$input->required();
 $form->add($input);
 
 // Email
 $input = new Input("text", "email", "Email:");
 $input->set("maxlength", "64");
 $input->set("value", $email);
+$input->required();
 if($authorized) {
     $input->set("disabled", "true");
 }
@@ -223,11 +223,13 @@ $form->add($input);
 // Password
 $input = new Input("password", "password1", "Password:");
 $input->set("maxlength", "64");
+$input->required();
 $form->add($input);
 
 // Password again
 $input = new Input("password", "password2", "Password again:");
 $input->set("maxlength", "64");
+$input->required();
 $form->add($input);
 
 // Birthdate

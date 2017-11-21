@@ -24,8 +24,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET") {
     }
     if(isset($_GET["date"])) {
         // Meet the target
-        $source->meet($target->email, $_GET["date"]);
-        redirect("profile.php?target=$target->email");
+        
     }
 }
 
@@ -40,6 +39,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     if(isset($_POST["support_stop"])) {
         $source->drop($target->email);
+    }
+    if(isset($_POST["meet"])) {
+        redirect("date_selector.php?regime=meeting&target=$target->email");
     }
 }
 
@@ -91,15 +93,16 @@ if($source == $target) {
     } else {
         $page->add(new Text("Upcoming sessions:"));
         $table = new Table(
-            array(new Text("Date"), new Text(""))
+            array(new Text("Date"), new Text("Where"), new Text(""))
         );
         foreach($sessions as $session) {
             $session = Session::look_up($session);
             $date = new Text($session->date);
+            $place = new Text(Place::look_up($session->place)->address);
             $link = new Link(
                 "session.php?session=$session->id", "more info..."
             );
-            $table->add(array($date, $link));
+            $table->add(array($date, $place, $link));
         }
         $page->add($table);
     }
@@ -210,8 +213,7 @@ if($target != $source) {
             && array_search($target->email, $source->alcoholics()) !== FALSE
         )
     ) {
-        $input = new Input("button", "meet");
-        $input->set("id", "meet");
+        $input = new Input("submit", "meet");
         $input->set("value", "Meet");
         $form->add($input);
     }
@@ -231,6 +233,11 @@ if(
     $page->newline();
 }
 
+// XXX
+$element = new Text("");
+$element->set("id", "timer");
+$page->add($element);
+
 // Render the page
 $page->render();
 
@@ -238,30 +245,18 @@ $page->render();
 
 <script>
 
-// Set 'meet' button callback
-document.getElementById("meet").onclick = function() {
-    var name = document.getElementById("name").value;
-    var email = document.getElementById("target").value;
-    var dateStr;
-    while(true) {
-        dateStr = prompt(
-            "When would you like to meet " + name + "? (yyyy-mm-dd)", ""
-        );
-        if(dateStr == null) {
-            // Cancel
-            break;
+// Automatic logout
+var seconds = 10;
+var prompt = "automatic logout after: ";
+document.getElementById("timer").textContent = prompt + seconds;
+setInterval(
+    function() {
+        seconds--;
+        if(seconds == 0) {
+            window.location.replace("index.php?logout=yes");
         }
-        var date = new Date(dateStr);
-        var year = date.getFullYear();
-        var month = eval(date.getMonth())+1;
-        var day = date.getDate();
-        if(!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-            // Success
-            window.location.replace(
-                "profile.php?target=" + email + "&date=" + dateStr
-            );
-        }
-    }
-}
-
+        document.getElementById("timer").textContent = prompt + seconds;
+    },
+    1000
+);
 </script>
