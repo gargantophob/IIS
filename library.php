@@ -5,15 +5,6 @@
  * Some useful ancillary procedures.
  * @author xandri03
  */
- 
-/**
- * Restrict page access to authorized users.
- */
-function restrict_page_access() {
-    if(empty($_SESSION["user"])) {
-        exit("You do not have permission to access this page.");
-    }
-}
 
 /**
  * Redirect to URL.
@@ -24,6 +15,18 @@ function redirect($url, $permanent = FALSE) {
     }
     exit("Internal error.");
 }
+ 
+/**
+ * Restrict page access to authorized users.
+ */
+function restrict_page_access() {
+    if(empty($_SESSION["user"])) {
+        session_unset();
+        session_destroy();
+        redirect("index.php");
+        //exit("You do not have permission to access this page.");
+    }
+}
 
 /**
  * Sanitize form input.
@@ -33,11 +36,18 @@ function sanitize($input) {
 }
 
 /**
+ * Today's date
+ */
+function today() {
+    return date("Y-m-d");
+}
+
+/**
  * Date comparator.
  * @return  TRUE if the date is in future.
  */
 function is_future($date) {
-    return strtotime(date("Y-m-d")) <= strtotime($date);
+    return strtotime(today()) <= strtotime($date);
 }
 
 ?>

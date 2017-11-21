@@ -139,8 +139,14 @@ function form_process() {
 
 // Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Process form
-    if(form_process() === TRUE) {
+    // Differentiate buttons
+    if(isset($_POST["delete"])) {
+        $person = Person::look_up($email);
+        $person->delete();
+        session_unset();
+        session_destroy();
+        redirect("index.php");
+    } elseif(form_process() === TRUE) {
         // Preprocess input data
         if($gender == "") {
             $gender = null;
@@ -280,6 +286,14 @@ $form->add($block);
 // Submit
 $input = new Input("submit", "submit");
 $input->set("value", "Submit");
+$form->add($input);
+
+// Profile deletion button
+$input = new Input("submit", "delete");
+$input->set("value", "Delete profile");
+if(!$authorized) {
+    $input->set("hidden", "true");
+}
 $form->add($input);
 
 // Error message

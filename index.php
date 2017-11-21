@@ -12,7 +12,6 @@
 // TODO signup.php: profile deletion
 // TODO activity timer
 // TODO how to display tables?
-// TODO sessions/meetings sort
 
 require_once "library.php";
 require_once "entity.php";

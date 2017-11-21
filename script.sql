@@ -1,16 +1,7 @@
--- drop all tables
-DROP TABLE IF EXISTS person;
-DROP TABLE IF EXISTS alcoholic;
-DROP TABLE IF EXISTS patron;
-DROP TABLE IF EXISTS expert;
-DROP TABLE IF EXISTS patron_supports;
-DROP TABLE IF EXISTS expert_supervises;
-DROP TABLE IF EXISTS meeting;
-DROP TABLE IF EXISTS place;
-DROP TABLE IF EXISTS session;
-DROP TABLE IF EXISTS person_attends;
-DROP TABLE IF EXISTS alcohol;
-DROP TABLE IF EXISTS report;
+-- reset database
+DROP DATABASE if exists xandri03;
+CREATE DATABASE xandri03;
+USE xandri03;
 
 -- Person
 CREATE TABLE person (
@@ -21,73 +12,95 @@ CREATE TABLE person (
 	gender		CHAR(1), -- 'M' is for 'male', 'F' is for 'female'
 	picture		LONGBLOB,
 	CHECK((gender = 'M') or (gender = 'Z'))
-);
+) ENGINE=InnoDB;
 
 -- Alcoholic, patron and expert
 CREATE TABLE alcoholic (
-	email	VARCHAR(64) PRIMARY KEY REFERENCES person(email)
-);
+  email     VARCHAR(64) NOT NULL PRIMARY KEY,
+  CONSTRAINT FOREIGN KEY (email) REFERENCES person(email) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE patron (
-	email	VARCHAR(64) PRIMARY KEY REFERENCES person(email)
-);
+  email     VARCHAR(64) NOT NULL PRIMARY KEY,
+  CONSTRAINT FOREIGN KEY (email) REFERENCES person(email) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE expert (
-	email		VARCHAR(64) PRIMARY KEY REFERENCES person(email),
+	email		VARCHAR(64) NOT NULL PRIMARY KEY,
 	education	VARCHAR(256),
-    practice	VARCHAR(256)
-);
+    practice	VARCHAR(256),
+    CONSTRAINT FOREIGN KEY (email) REFERENCES person(email) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- Patron supports, expert supervises
 CREATE TABLE patron_supports (
-	patron		VARCHAR(64) REFERENCES patron(email),
-	alcoholic	VARCHAR(64) REFERENCES alcoholic(email),
-	PRIMARY KEY (patron, alcoholic)
-);
+	patron		VARCHAR(64),
+	alcoholic	VARCHAR(64),
+	PRIMARY KEY (patron, alcoholic),
+    CONSTRAINT FOREIGN KEY (patron) REFERENCES patron(email) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (alcoholic) REFERENCES alcoholic(email) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE expert_supervises (
-	expert		VARCHAR(64) REFERENCES expert(email),
-	alcoholic	VARCHAR(64) REFERENCES alcoholic(email),
-	PRIMARY KEY (expert, alcoholic)
-);
+	expert		VARCHAR(64),
+	alcoholic	VARCHAR(64),
+	PRIMARY KEY (expert, alcoholic),
+    CONSTRAINT FOREIGN KEY (expert) REFERENCES expert(email) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (alcoholic) REFERENCES alcoholic(email) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- Meeting
 CREATE TABLE meeting (
 	id			INT PRIMARY KEY AUTO_INCREMENT,
-	patron		VARCHAR(64) REFERENCES patron(email),
-	alcoholic	VARCHAR(64) REFERENCES alcoholic(email),
-	date 		DATE NOT NULL
-);
+	patron		VARCHAR(64),
+	alcoholic	VARCHAR(64),
+	date 		DATE NOT NULL,
+    CONSTRAINT FOREIGN KEY (patron) REFERENCES patron(email) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (alcoholic) REFERENCES alcoholic(email) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- Place, session
 CREATE TABLE place (
 	id		INT PRIMARY KEY  AUTO_INCREMENT,
     address	VARCHAR(64) NOT NULL
-);
+) ENGINE=InnoDB;
+
 CREATE TABLE session (
 	id		INT PRIMARY KEY  AUTO_INCREMENT,
 	date	DATE NOT NULL,
-	place	INT REFERENCES place(id),
-	leader	VARCHAR(64) REFERENCES person(email)
-);
+	place	INT,
+	leader	VARCHAR(64),
+    CONSTRAINT FOREIGN KEY (place) REFERENCES place(id) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (leader) REFERENCES person(email) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE person_attends (
-	email		VARCHAR(64) REFERENCES person(email),
-	session		INT REFERENCES session(id),
-	PRIMARY KEY (email, session)
-);
+	email		VARCHAR(64),
+	session		INT,
+	PRIMARY KEY (email, session),
+    CONSTRAINT FOREIGN KEY (email) REFERENCES person(email) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (session) REFERENCES session(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- Alcohol, alcohol report
 CREATE TABLE alcohol (
 	id		INT PRIMARY KEY  AUTO_INCREMENT,
 	type	VARCHAR(32),
 	origin	VARCHAR(32)
-);
+) ENGINE=InnoDB;
+
 CREATE TABLE report (
 	id			INT PRIMARY KEY  AUTO_INCREMENT,
 	date		DATE NOT NULL,
 	bac			FLOAT NOT NULL,
-	alcohol		INT REFERENCES alcohol(id),
-	alcoholic	VARCHAR(64) REFERENCES alcoholic(email),
-	expert		VARCHAR(64) REFERENCES expert(email),
+	alcohol		INT,
+	alcoholic	VARCHAR(64),
+	expert		VARCHAR(64),
+    CONSTRAINT FOREIGN KEY (alcohol) REFERENCES alcohol(id) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (alcoholic) REFERENCES alcoholic(email) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (expert) REFERENCES expert(email) ON DELETE CASCADE,
 	CHECK ((bac > 0.0) and (bac <= 1.0))
-);
+) ENGINE=InnoDB;
 
 -- Populate
 INSERT INTO person (email, password, name, birthdate, gender, picture) VALUES

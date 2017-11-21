@@ -84,6 +84,13 @@ class Person {
     }
     
     /**
+     * Delete person record.
+     */
+    public function delete() {
+        DB::$person->delete("email='$this->email'");
+    }
+    
+    /**
      * List future sessions starting from the earliest one.
      */
     public function future_sessions() {
@@ -172,7 +179,7 @@ class Alcoholic extends Person {
         Person::insert();
         DB::$alcoholic->insert(array("'$this->email'"));
     }
-    
+
     /**
      * List patrons that support this alcoholic.
      * @return  an array of emails (might me empty)
@@ -300,7 +307,7 @@ class Expert extends Person {
             array("'$this->email'", "'$this->education'", "'$this->practice'")
         );
     }
-    
+
     /**
      * Update expert and person fields in a database.
      */
