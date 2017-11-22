@@ -230,13 +230,18 @@ if($target != $source) {
 $page->add($form);
 
 // Report button
-if(
-    ($source == $target && $source->role == "alcoholic")
-    || ($source->role == "expert" && $target->role == "alcoholic")
-) {
-    $link = plink("new_report.php", array("target" => $target->email));
-    $page->add(new Link($link, "Report alcohol consumption"));
-    $page->newline();
+if($target->role == "alcoholic") {
+    $condition = FALSE;
+    if($source == $target) {
+        $condition = TRUE;
+    } elseif($source->role == "expert") {
+        $condition = array_search($target->email, $source->alcoholics()) !== FALSE;
+    }
+    if($condition) {
+        $link = plink("new_report.php", array("target" => $target->email));
+        $page->add(new Link($link, "Report alcohol consumption"));
+        $page->newline();
+    }
 }
 
 // XXX

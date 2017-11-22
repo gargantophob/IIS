@@ -63,7 +63,7 @@ $page->newline();
 // List user's upcoming sessions
 $my_sessions = $source->sessions();
 if(count($my_sessions) == 0) {
-    $page->add(new Text("You are not enrolled to any session yet."));
+    $page->add(new Text("You are not enrolled to any upcoming session yet."));
 } else {
     $page->add(new Text("Your upcoming sessions:"));
     $page->add(sessions_table($my_sessions));
@@ -74,7 +74,7 @@ $page->newline();
 // List other upcoming sessions
 $other_sessions = array_diff(Session::all_future(), $my_sessions);
 if(count($other_sessions) == 0) {
-    $page->add(new Text("There are no upcoming sessions."));
+    $page->add(new Text("There are no other upcoming sessions."));
 } else {
     $page->add(new Text("Other upcoming sessions:"));
     $page->add(sessions_table($other_sessions));

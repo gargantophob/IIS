@@ -23,24 +23,25 @@ $source = Person::look_up($_SESSION["user"]);
 $session = null;
 if($_SERVER["REQUEST_METHOD"] == "GET") {
     $session = get_data("session");
-    $session = Session::look_up($_GET["session"]);
-}
-if($session == null) {
-    // Invalid session identifier
-    redirect("sessions.php");
+    $session = Session::look_up($session);
+    if($session == null) {
+        // Invalid session identifier
+        redirect("sessions.php");
+    }
 }
 
 // Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     // Extract session
     $session = post_data("session");
+    $session = Session::look_up($session);
     
     // Differentiate buttons
     if(post_data("enroll") != null) {
-        $source->enroll($session);
+        $source->enroll($session->id);
     }
     if(post_data("unenroll") != null) {
-        $source->unenroll($session);
+        $source->unenroll($session->id);
     }
 }
 
@@ -101,28 +102,3 @@ $form->add($input);
 $page->render();
 
 ?>
-
-<script>
-
-var meet = document.getElementById("new_place");
-meet.onclick = function() {
-    var success = false;
-    var address;
-    while(true) {
-        address = prompt(
-            "Enter address:", ""
-        );
-        if(address == null) {
-            // Cancel
-            break;
-        }
-        if(address != "") {
-            // Success
-            window.location.replace("places.php?address=" + address);
-        }
-    }
-}
-
-</script>
-
-
