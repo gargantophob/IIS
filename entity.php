@@ -93,8 +93,8 @@ class Person {
     /**
      * List future sessions starting from the earliest one.
      */
-    public function future_sessions() {
-        return Session::future_sessions_of($this->email);
+    public function sessions() {
+        return Session::sessions_of($this->email);
     }
     
     /**
@@ -201,7 +201,7 @@ class Alcoholic extends Person {
     }
 
     /**
-     * List all meetings of this alcoholic.
+     * List future meetings of this alcoholic.
      */
     public function meetings() {
         return Meeting::meetings_of($this->email, $this->role);
@@ -268,7 +268,7 @@ class Patron extends Person {
     }
 
     /**
-     * List all meetings.
+     * List future meetings.
      */
     public function meetings() {
         return Meeting::meetings_of($this->email, $this->role);
@@ -395,13 +395,35 @@ class Meeting {
     }
 
     /**
-     * Look up all meetings of a person. 
+     * Look up all future meetings of a person. 
      * @param email person to look up
      * @param role  role of a person ("alcoholic" or "patron")
-     * @return      array of meeting identifiers (might be empty)
+     * @return      array of meeting identifiers (might be empty) sorted by date
      */
     public static function meetings_of($email, $role) {
-        return DB::$meeting->select("id", "$role='$email'");
+        // Extract all meetings
+        $meetings = DB::$meeting->select("id", "$role='$email'");
+        
+        // Filter future ones
+        $future = array();
+        foreach($meetings as $meeting) {
+            $date = self::look_up($meeting)->date;
+            if(is_future($date)) {
+                $future[$meeting] = strtotime($date);
+            }
+        }
+        
+        // Sort
+        asort($future);
+        
+        // Extract keys
+        $sorted = array();
+        foreach($future as $key => $value) {
+            array_push($sorted, $key);
+        }
+
+        // Success
+        return $sorted;
     }
 }
 
@@ -509,33 +531,32 @@ class Session {
     }
     
     /**
-     * Look up all sessions of a person. 
-     * @param email person to look up
-     * @return      array of session identifiers (might be empty)
+     * Filter future sessions.
+     * @param sessions  array of session identifiers (might be empty)
+     * @return          array of session identifiers (might be empty)
      */
-    public static function sessions_of($email) {
-        return DB::$person_attends->select("session", "email = '$email'");
+    public static function filter_future($sessions) {
+        $future = array();
+        foreach($sessions as $session) {
+            if(is_future(self::look_up($session)->date)) {
+                array_push($future, $session);
+            }
+        }
+        return $future;
     }
     
     /**
-     * Look up all future sessions of a person.
-     * @param email person to look up
-     * @return      sorted array of upcoming session identifiers
-     *              (might be empty)
+     * Sort sessions keys according to date (ascending).
+     * @param sessions  array of session identifiers (might be empty)
+     * @return          array of session identifiers (might be empty)
      */
-    public static function future_sessions_of($email) {
-        // Find all sessions
-        $sessions = self::sessions_of($email);
-        
-        // Filter only future ones
+    public static function sort($sessions) {
+        // Extract key and date
         $unsorted = array();
         foreach($sessions as $session) {
             $date = self::look_up($session)->date;
-            if(is_future($date)) {
-                $unsorted[$session] = strtotime($date);
-            }
+            $unsorted[$session] = strtotime($date);
         }
-        
         
         // Sort
         asort($unsorted);
@@ -548,7 +569,24 @@ class Session {
 
         // Success
         return $sorted;
-        
+    }
+    
+    /**
+     * Look up all future sessions.
+     * @return  an array of session identifiers (might be empty) sorted by date
+     */
+    public static function all_future() {
+        return self::sort(self::filter_future(self::all()));
+    }
+    
+    /**
+     * Look up all future sessions of a person. 
+     * @param email person to look up
+     * @return      array of session identifiers (might be empty)
+     */
+    public static function sessions_of($email) {
+        $sessions = DB::$person_attends->select("session", "email = '$email'");
+        return self::sort(self::filter_future($sessions));
     }
 }
 

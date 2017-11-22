@@ -19,15 +19,14 @@ $date = $error = "";
 
 function form_process() {
 	global $date, $error;
-	$date = sanitize($_POST["date"]);
-	
 	// Check date format
-	$d = DateTime::createFromFormat("Y-m-d", $date);
-	if($d === FALSE) {
+    $date = parse_date($sanitize("date"));
+    if($date == null) {
 		$error = "Wrong date format.";
 		return FALSE;
 	}
-	$date = $d->format("Y-m-d");
+	
+    // Check date
     if(!is_future($date)) {
         $error = "Please select a future date.";
         return FALSE;

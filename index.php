@@ -3,6 +3,11 @@
 /**
  * @file index.php
  * Sign in page.
+ * 
+ * Interface:
+ * [G] logout   - logout flag
+ * [S] user     - redirect to profile page
+ * 
  * @author xandri03
  */
 
@@ -23,33 +28,31 @@ session_start();
 
 // Log out redirections
 if($_SERVER["REQUEST_METHOD"] == "GET") {
-    if(isset($_GET["logout"])) {
+    if(get_data("logout") != null) {
         logout();
     }
 }
 
 // Redirect to profile page if already signed in.
-if(isset($_SESSION["user"])) {
+if(session_data("user") != null) {
     redirect("profile.php");
 }
 
-// Initialize the page
-$page = new Page();
-$user = $error = "";
+$email = $error = "";
 
 /**
  * Form processor. Check username and his password.
  * @return  TRUE on success, FALSE otherwise
  */
 function form_process() {
-    global $user, $error;
+    global $email, $error;
 
     // Collect username and password
-    $user = sanitize($_POST["user"]);
-    $password = sanitize($_POST["password"]);
-
+    $email = sanitize("email");
+    $password = sanitize("password");
+    
     // Check against database
-    $person = Person::look_up($user);
+    $person = Person::look_up($email);
     return $person != null && $person->password == $password;
 }
 
@@ -58,7 +61,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     // Process the form
     if(form_process() === TRUE) {
         // Authentication success
-        $_SESSION["user"] = $user;
+        $_SESSION["user"] = $email;
         redirect("profile.php");
     }
     
@@ -66,19 +69,22 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     $error = "Incorrect login/password.";
 }
 
+// Initialize the page
+$page = new Page();
+
 // Welcome text
-$element = new Text("Welcome to Alcoholics Anonymous!");
-$page->add($element);
-$page->newline(); $page->newline();
+$page->add(new Text("Welcome to Alcoholics Anonymous!"));
+$page->newline();
+$page->newline();
 
 // Sign in form
 $form = new Form();
 $page->add($form);
 
 // Username
-$input = new Input("text", "user", "Email:");
+$input = new Input("text", "email", "Email:");
 $input->set("maxlength", "64");
-$input->set("value", $user);
+$input->set("value", $email);
 $form->add($input);
 
 // Password
@@ -95,10 +101,8 @@ $form->add($input);
 $form->add_error($error);
 
 // Sign up link
-$element = new Text("New here? ");
-$page->add($element);
-$element = new Link("signup.php", "Sign up!");
-$page->add($element);
+$page->add(new Text("New here? "));
+$page->add(new Link("signup.php", "Sign up!"));
 
 // Render the page
 $page->render();

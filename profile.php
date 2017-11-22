@@ -6,6 +6,9 @@
  * @author xandri03
  */
 
+/* INTERFACE:
+ * 
+ */
 require_once "library.php";
 require_once "entity.php";
 require_once "html.php";
@@ -15,40 +18,36 @@ restrict_page_access();
 
 // Read source (session) and target
 $source = Person::look_up($_SESSION["user"]);
-$target = $source;  // default target is the source
 
 // Manual redirections
 if($_SERVER["REQUEST_METHOD"] == "GET") {
-    if(isset($_GET["target"])) {
-        $target = Person::look_up($_GET["target"]);
-    }
-    if(isset($_GET["date"])) {
-        // Meet the target
-        
+    $target = get_data("target");
+    if($target != null) {
+        $target = Person::look_up($email);
+    } else {
+        $target = $source;
     }
 }
 
 // Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Extract hidden target
-    $target = Person::look_up($_POST["target"]);
+    // Hidden target
+    $target = Person::look_up(post_data("target"));
 
     // Differentiate buttons
-    if(isset($_POST["support_start"])) {
+    if(post_data("support_start") != null) {
         $source->support($target->email);
     }
-    if(isset($_POST["support_stop"])) {
+    if(post_data("support_stop") != null) {
         $source->drop($target->email);
     }
-    if(isset($_POST["meet"])) {
-        redirect("date_selector.php?regime=meeting&target=$target->email");
+    if(post_data("meet") != null) {
+        $par =  array("regime" => "meeting", "target" => $target->email);
+        redirect(plink("date_selector.php", $par));
     }
 }
 
-// Initialize the page
-$page = new Page();
-
-// Preprocess some target data
+// Preprocess target data
 $birthdate = $target->birthdate;
 if($birthdate == null) {
     $birthdate = "?";
@@ -59,6 +58,9 @@ if($gender == null) {
 } else {
     $gender = $gender == "M" ? "Male" : "Female";
 }
+
+// Initialize the page
+$page = new Page();
 
 // Print general data
 $page->add(new Text("Name: " . $target->name));
@@ -86,10 +88,10 @@ if($source == $target) {
 
 if($source == $target) {
     // List future sessions
-    $sessions = $source->future_sessions();
+    $sessions = $source->sessions();
     if(count($sessions) == 0) {
-        $page->add(new Text("No upcoming sessions: "));
-        $page->add(new Link("sessions.php", "find one."));
+        $page->add(new Text("No upcoming sessions: enroll "));
+        $page->add(new Link("sessions.php", "here."));
     } else {
         $page->add(new Text("Upcoming sessions:"));
         $table = new Table(
@@ -100,7 +102,8 @@ if($source == $target) {
             $date = new Text($session->date);
             $place = new Text(Place::look_up($session->place)->address);
             $link = new Link(
-                "session.php?session=$session->id", "more info..."
+                plink("session.php", array("session" => $session->id)),
+                "more info..."
             );
             $table->add(array($date, $place, $link));
         }
@@ -114,23 +117,21 @@ if($source == $target) {
         $meetings = $source->meetings();
         if(count($meetings) == 0) {
             $page->add(new Text("No upcoming meetings: "));
-            $page->add(new Link("members.php?type=patrons", "suggest one."));
+            $type = $source->role == "alcoholic" ? "patrons" : "alcoholics";
+            $link = plink("members.php", array("type" => $type));
+            $page->add(new Link($link, "suggest one."));
         } else {
             $page->add(new Text("Upcoming meetings:"));
             $table = new Table(array(new Text("Patron"), new Text("Date")));
             foreach($meetings as $meeting) {
                 $meeting = Meeting::look_up($meeting);
-                if(!is_future($meeting->date)) {
-                    continue;
-                }
                 if($source->role == "alcoholic") {
                     $person = $meeting->patron;
                 } else {
                     $person = $meeting->alcoholic;
                 }
-                $link = new Link(
-                    "profile.php?target=$person", Person::look_up($person)->name
-                );
+                $link = plink("profile.php", array("target" => $person));
+                $link = new Link($link, Person::look_up($person)->name);
                 $date = new Text($meeting->date);
                 $table->add(array($link, $date));
             }
@@ -154,16 +155,13 @@ if($target->role == "alcoholic") {
         $bac = new Text($report->bac);
         $reporter = $report->expert;
         if($reporter == null) {
-            $reporter = new Text("Self-reported");
+            $reporter = new Text("self-reported");
         } else {
             $reporter = Person::look_up($reporter);
-            $reporter = new Link(
-                "profile.php?target=$reporter->email", $reporter->name
-            );
+            $link = plink("profile.php", array("target" => $reporter->email));
+            $link = new Link($link, $reporter->name);
         }
-        $table->add(array(
-            $date, $bac, $reporter
-        ));
+        $table->add(array($date, $bac, $link));
     }
     $page->add($table);	
     $page->newline();
@@ -225,11 +223,8 @@ if(
     ($source == $target && $source->role == "alcoholic")
     || ($source->role == "expert" && $target->role == "alcoholic")
 ) {
-    $page->add(
-        new Link(
-            "new_report.php?target=$target->email", "Report alcohol consumption"
-        )
-    );
+    $link = plink("new_report.php", array("target" => $target->email));
+    $page->add(new Link($link, "Report alcohol consumption"));
     $page->newline();
 }
 

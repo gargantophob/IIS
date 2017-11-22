@@ -25,7 +25,7 @@ $page->newline();
 $page->newline();
 
 // List upcoming sessions
-$my_sessions = $source->future_sessions();
+$my_sessions = $source->sessions();
 if(count($my_sessions) != 0) {
     $page->add(new Text("Upcoming sessions:"));
     $table = new Table(
@@ -49,7 +49,7 @@ $page->newline();
 
 // List other upcoming sessions
 $page->add(new Text("Other sessions:"));
-$sessions = array_diff(Session::all(), $my_sessions);
+$sessions = array_diff(Session::all_future(), $my_sessions);
 $table = new Table(
     array(
         new Text("Date"), new Text("Where"), new Text("Leader"), new Text("")

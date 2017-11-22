@@ -3,6 +3,12 @@
 /**
  * @file signup.php
  * Sign up (profile edit) page.
+ * 
+ * Interface:
+ * [S] user     - edit user profile
+ * [G] logout   - logout flag
+ * 
+ * 
  * @author xandri03
  */
 
@@ -17,10 +23,10 @@ $email = $password = $name = $birthdate = $gender = $picture = $role = "";
 $education = $practice = "";
 $error = "";
 
-if(isset($_SESSION["user"])) {
+if(session_data("user") != null) {
     // Preset user data
     $authorized = TRUE;
-    $email = $_SESSION["user"];
+    $email = session_data("user");
     $person = Person::look_up($email);
     $name = $person->name;
     $birthdate = $person->birthdate;
@@ -33,8 +39,7 @@ if(isset($_SESSION["user"])) {
 }
 
 /**
- * Form processor. Check all form inputs.
- * @return TRUE on success, FALSE otherwise.
+ * Form processor.
  */
 function form_process() {
     global $authorized;
@@ -44,17 +49,17 @@ function form_process() {
 
     // Collect data
     if(!$authorized) {
-        $email = sanitize($_POST["email"]);
-        $role = $_POST["role"];
+        $email = sanitize("email");
+        $role = post_data("role");
     }
-    $name = sanitize($_POST["name"]);
-    $password1 = sanitize($_POST["password1"]);
-    $password2 = sanitize($_POST["password2"]);
-    $birthdate = sanitize($_POST["birthdate"]);
-    $gender = empty($_POST["gender"]) ? "" : sanitize($_POST["gender"]);
+    $name = sanitize("name");
+    $password1 = sanitize("password1");
+    $password2 = sanitize("password2");
+    $birthdate = sanitize("birthdate");
+    $gender = sanitize("gender");
     $picture = basename($_FILES["file"]["name"]);
-    $education = sanitize($_POST["education"]);
-    $practice = sanitize($_POST["practice"]);
+    $education = sanitize("education");
+    $practice = sanitize("practice");
 
     // Check name
     if($name == "") {
@@ -76,12 +81,6 @@ function form_process() {
         }
     }
 
-    // Check passwords
-    if($password1 == "") {
-        $error = "Password is required.";
-        return FALSE;
-    }
-    
     // Check password length
     if(strlen($password1) < 8) {
         $error = "Password should be at least 8 characters long.";
@@ -99,12 +98,11 @@ function form_process() {
 
     // Check birthdate
     if($birthdate != "") {
-        $date = DateTime::createFromFormat("Y-m-d", $birthdate);
-        if($date === FALSE) {
+        $birthdate = parse_date($birthdate);
+        if($birthdate == null) {
             $error = "Wrong date format.";
             return FALSE;
         }
-        $birthdate = $date->format("Y-m-d");
     }
 
     // Check filename
@@ -140,11 +138,14 @@ function form_process() {
 // Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     // Differentiate buttons
-    if(isset($_POST["delete"])) {
-        $person = Person::look_up($email);
-        $person->delete();
+    if(post_data("delete") != null) {
+        // Delete account
+        Person::look_up($email)->delete();
         logout();
-    } elseif(form_process() === TRUE) {
+    }
+    
+    // Process formt
+    if(form_process() === TRUE) {
         // Preprocess input data
         if($gender == "") {
             $gender = null;
@@ -200,8 +201,8 @@ $page = new Page();
 
 // Sign up form
 $form = new Form();
-$page->add($form);
 $form->set("enctype", "multipart/form-data");
+$page->add($form);
 
 // Name
 $input = new Input("text", "name", "Name:");
@@ -306,9 +307,8 @@ $page->render();
 
 ?>
 
-<!-- javascript part -->
 <script>
-    
+
     /**
      * Set visibilty of all elements of specific class
      */
