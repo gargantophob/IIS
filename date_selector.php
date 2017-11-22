@@ -19,7 +19,7 @@ require_once "html.php";
 session_start();
 authorized_access();
 
-// Extract regime and target identifier
+// Retrieve context
 $target = $regime = null;
 if($_SERVER["REQUEST_METHOD"] == "GET") {
     $regime = get_data("regime");
@@ -29,8 +29,6 @@ if($_SERVER["REQUEST_METHOD"] == "GET") {
     $regime = post_data("regime");
     $target = post_data("target");
 }
-
-// Check
 if($regime == null || $target == null) {
     recover();
 }
@@ -86,7 +84,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             list($key, $session) = each($diff);
             
             // Enroll leader to this session
-            Person::look_up($_SESSION["user"])->enroll($session);
+            Person::look_up(session_data("user"))->enroll($session);
             
             // Redirect to session page
             redirect(plink("session.php", array("session" => $session)));
@@ -95,6 +93,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 	}
 }
 
+// Initialize the page
 $page = new Page();
 
 // Prompt

@@ -3,6 +3,14 @@
 /**
  * @file alcohol_selector.php
  * Alcohol selector for reports.
+ * 
+ * Protocol:
+ * [G] bac      - BAC value
+ * [G] target   - alcoholic email
+ * [G] expert   - reporter email (optional)
+ * [G] id       - selected alcohol (optional)
+ * Authorized access.
+ * 
  * @author xandri03
  */
  
@@ -11,18 +19,22 @@ require_once "entity.php";
 require_once "html.php";
 
 session_start();
-restrict_page_access();
+authorized_access();
 
 if($_SERVER["REQUEST_METHOD"] == "GET") {
     $bac = get_data("bac");
     $target = get_data("target");
     $expert = get_data("expert");
+    if($bac == null || $target == null) {
+        recover();
+    }
+    
     $id = get_data("id");
     if($id != null) {
         // Create a report
         $report = new Report(-1, today(), $bac, $target, $expert);
         $report->insert();
-        redirect("profile.php?target=$target");
+        redirect(plink("profile.php", array("target" => $target)));
     }
 }
 
@@ -33,18 +45,17 @@ $page = new Page();
 $page->add(new Text("Select consumed alcohol:"));
 
 // List alcohol
-$table = new Table();
-$table->add(array(new Text("Type"), new Text("Origin"), new Text("")));
+$table = new Table(array(new Text("Type"), new Text("Origin"), new Text("")));
 foreach(Alcohol::all() as $id) {
     $record = Alcohol::look_up($id);
-    $type = $record->type;
-    $origin = $record->origin;
-    $link = "alcohol_selector.php";
-    $link .= "?bac=$bac";
-    $link .="&target=$target";
-    $link .="&expert=$expert";
-    $link .= "&id=$record->id";
-    $table->add(array(new Text($type), new Text($origin), new Link($link, "select")));
+    $type = new Text($record->type);
+    $origin = new Text($record->origin);
+    $par = array(
+        "bac" => $bac, "target" => $target, "expert" => $expert,
+        "id" => $record->id
+    );
+    $link = new Link(plink("alcohol_selector.php", $par), "select");
+    $table->add(array($type, $origin, $link));
 }
 $page->add($table);
 

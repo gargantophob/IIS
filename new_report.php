@@ -3,6 +3,11 @@
 /**
  * @file new_report.php
  * New report creation.
+ * 
+ * Protocol:
+ * [G] target   - alcoholic email
+ * Authorized access.
+ * 
  * @author xandri03
  */
  
@@ -11,18 +16,29 @@ require_once "entity.php";
 require_once "html.php";
 
 session_start();
-restrict_page_access();
+authorized_access();
 
+// Extract context
+$source = Person::look_up(session_data("user"));
+$target = null;
+if($_SERVER["REQUEST_METHOD"] == "GET") {
+    $target = get_data("target");
+}
+$bac = $error = "";
+
+/*
+ * Form processor.
+ */
 function form_process() {
-    global $alcoholic, $bac;
+    global $target, $bac;
     global $error;
 
     // Collect data
-    $alcoholic = sanitize(post_data("alcoholic"));
-    $bac = sanitize(post_data("bac"));
+    $target = sanitize("target");
+    $bac = sanitize("bac");
     
     // Check alcoholic existence
-    $person = Person::look_up($alcoholic);
+    $person = Person::look_up($target);
     if($person == null || $person->role != "alcoholic") {
         $error = "Such alcoholic does not exist.";
         return FALSE;
@@ -40,32 +56,16 @@ function form_process() {
     return TRUE;
 }
 
-// Extract source, target
-$source = Person::look_up(session_data("user"));
-$target = null;
-if($_SERVER["REQUEST_METHOD"] == "GET") {
-    $target = get_data("target");
-    if($target != null) {
-        $target = Person::look_up($target);
-    }
-}
-
-// Extract alcoholic, expert
-$alcoholic = $target == null ? "" : $target->email;
-$expert = $source->role == "expert" ? $source->email : null;
-$bac = "";
-$error = "";
-
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     if(form_process() === TRUE) {
+        // Identify reporter
+        $expert = $source->role == "expert" ? $source->email : null;
+
         // Select alcohol
-        $link = "alcohol_selector.php";
-        $link .= "?bac=$bac";
-        $link .="&target=$alcoholic";
-        if($expert != null) {
-            $link .="&expert=$expert";
-        }
-        redirect($link);
+        $par = array(
+            "bac" => $bac, "target" => $target, "expert" => $expert
+        );
+        redirect(plink("alcohol_selector.php", $par));
     }
 }
 
@@ -78,10 +78,10 @@ $page->add($form);
 
 // Alcoholic
 $block = new Block();
-$input = new Input("text", "alcoholic", "Alcoholic:");
-$input->set("value", $alcoholic);
+$input = new Input("text", "target", "Alcoholic:");
+$input->set("value", $target);
 $block->add($input);
-if($source->email == $alcoholic) {
+if($source->role == "alcoholic") {
     $block->set("hidden", "true");
 }
 $form->add($block);
@@ -93,7 +93,7 @@ $form->add($input);
 
 // Submit
 $input = new Input("submit", "submit");
-$input->set("value", "Report");
+$input->set("value", "Continue");
 $form->add($input);
 
 // Error message
