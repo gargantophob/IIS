@@ -1,7 +1,14 @@
 <?php
 
-/** @file date_selector.php
+/**
+ * @file date_selector.php
  * Date selector for meeting or session creation.
+ * 
+ * Protocol:
+ * [G] regime   - one of {meeting, session}
+ * [G] target   - either person to meet or a place to held session
+ * Authorized access.
+ * 
  * @author xandri03
  */
  
@@ -10,17 +17,35 @@ require_once "entity.php";
 require_once "html.php";
 
 session_start();
-restrict_page_access();
+authorized_access();
 
-// Initialize the page
-$target = null;
-$regime = "meeting";
+
+// Extract regime and target identifier
+$target = $regime = null;
+if($_SERVER["REQUEST_METHOD"] == "GET") {
+    $regime = get_data("regime");
+    $target = get_data("target");
+    
+} elseif($_SERVER["REQUEST_METHOD"] == "POST") {
+    $regime = post_data("regime");
+    $target = post_data("target");
+}
+
+// Check
+if($regime == null || $target == null) {
+    recover();
+}
+
+// Selected date
 $date = $error = "";
 
+/*
+ * Form processor.
+ */
 function form_process() {
 	global $date, $error;
 	// Check date format
-    $date = parse_date($sanitize("date"));
+    $date = parse_date(sanitize("date"));
     if($date == null) {
 		$error = "Wrong date format.";
 		return FALSE;
@@ -36,43 +61,22 @@ function form_process() {
 	return TRUE;
 }
 
-// Extract regime and target identifier
-if($_SERVER["REQUEST_METHOD"] == "GET") {
-    if(isset($_GET["regime"])) {
-        $regime = $_GET["regime"];
-    }
-	if(isset($_GET["target"])) {
-        $id = $_GET["target"];
-        if($regime == "meeting") {
-            $target = Person::look_up($id);
-        } else {
-            $target = Place::look_up($id);
-        }
-	}
-} elseif($_SERVER["REQUEST_METHOD"] == "POST") {
-    $regime = $_POST["regime"];
-    $id = $_POST["target"];
-    if($regime == "meeting") {
-        $target = Person::look_up($id);
-    } else {
-        $target = Place::look_up($id);
-    }
-}
-
+// Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     // Process date
 	if(form_process() === TRUE) {
         if($regime == "meeting") {
             // Meet
-            $source = Person::look_up($_SESSION["user"]);
-            $source->meet($target->email, $date);
-            redirect("profile.php?target=$target->email");
+            Person::look_up(session_data("user"))->meet($target, $date);
+            
+            // Return to home page
+            redirect("profile.php");
         } else {
             // Get sessions keyset
             $sessions_old = Session::all();
             
             // Create new session
-            $session = new Session(-1, $date, $target->id, $_SESSION["user"]);
+            $session = new Session(-1, $date, $target, session_data("user"));
             $session->insert();
             
             // Get new keyset
@@ -86,7 +90,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             Person::look_up($_SESSION["user"])->enroll($session);
             
             // Redirect to session page
-            redirect("session.php?session=$session");
+            redirect(plink("session.php", array("session" => $session)));
         }
         
 	}
@@ -95,19 +99,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 $page = new Page();
 
 // Prompt
-if($regime == "meeting") {
-    $text = "Person: $target->email";
-} else {
-    $text = "Place: $target->address";
-}
-$page->add(new Text($text));
-$page->newline();
-
 $page->add(new Text("Pick a date (yyyy-mm-dd):"));
 $page->newline();
 
 // Form
 $form = new Form();
+$page->add($form);
 
 // Hidden regime
 $input = new Input("text", "regime");
@@ -115,14 +112,9 @@ $input->set("value", $regime);
 $input->set("hidden", "true");
 $form->add($input);
 
-// Hidden target email
+// Hidden target identifier
 $input = new Input("text", "target");
-if($regime == "meeting") {
-    $value = $target->email;
-} else {
-    $value = $target->id;
-}
-$input->set("value", $value);
+$input->set("value", $target);
 $input->set("hidden", "true");
 $form->add($input);
 
@@ -136,10 +128,8 @@ $input = new Input("submit", "submit");
 $input->set("value", "Submit");
 $form->add($input);
 
+// Error message
 $form->add_error($error);
-
-// Form complete
-$page->add($form);
 
 // Render the page
 $page->render();

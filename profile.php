@@ -161,7 +161,7 @@ if($target->role == "alcoholic") {
         if($without_drink == 0) {
             $without_drink = "today.";
         } else {
-            $without_drink .= " days ago.";
+            $without_drink .= " day(s) ago.";
         }
     }
     $page->add(new Text("Last consumption: $without_drink"));
