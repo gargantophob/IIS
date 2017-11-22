@@ -5,9 +5,7 @@
  * Profile page.
  * 
  * Protocol:
- * [S] user     - authorized user
  * [G] target   - target page email
- * 
  * Authorized access.
  * 
  * @author xandri03
@@ -27,7 +25,7 @@ $source = Person::look_up(session_data("user"));
 if($_SERVER["REQUEST_METHOD"] == "GET") {
     $target = get_data("target");
     if($target != null) {
-        $target = Person::look_up($email);
+        $target = Person::look_up($target);
     }
     
     if($target == null) {
@@ -84,7 +82,7 @@ $page->add(new Image(plink("image.php", array("target" => $target->email))));
 $page->newline();
 $page->newline();
 
-// Pick a correct possessive adjective
+// Pick correct possessive pronoun
 if($source == $target) {
     $pa = "Your";
 } elseif($target->gender == "F") {
@@ -149,8 +147,26 @@ if($source == $target) {
 
 // List reports and statistics
 if($target->role == "alcoholic") {
+    // Get reports
     $reports = $target->reports();
-    $page->add(new Text("$pa reports and statistics:"));
+    
+    // Get last report date
+    $last = end($reports);
+    if($last === FALSE) {
+        $without_drink = "?";
+    } else {
+        $today = new DateTime(today());
+        $date = new DateTime(Report::look_up($last)->date);
+        $without_drink = date_diff($today, $date)->format('%a');
+        if($without_drink == 0) {
+            $without_drink = "today.";
+        } else {
+            $without_drink .= " days ago.";
+        }
+    }
+    $page->add(new Text("Last consumption: $without_drink"));
+    $page->newline();
+    $page->add(new Text("$pa consumption reports:"));
     $table = new Table(array(
         new Text("Date"), new Text("BAC"), new Text("Reported by")
     ));

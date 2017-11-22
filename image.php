@@ -5,8 +5,7 @@
  * Image container.
  * 
  * Protocol:
- * [G] target - target user email
- * 
+ * [G] target - target profile email
  * Authorized access.
  * 
  * @author xandri03
