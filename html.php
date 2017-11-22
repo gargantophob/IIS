@@ -7,6 +7,7 @@
  * @author xsemri00
  */
 
+require_once "library.php";
 require_once "entity.php";
 
 /** HTML page. */
@@ -30,45 +31,39 @@ class Page {
         $topnav = new Block();
         $topnav->set('class', 'topnav');
         $source = null;
-        if(isset($_SESSION["user"])) {
-            $source = Person::look_up($_SESSION["user"]);
-        }
+        $source = session_data("user");
         if ($source == null) {
             $topnav->add(new Link("index.php", "Main page"));
-        }
-        else {
+        } else {
+            $source = Person::look_up($source);
+            
             // Everybody can see his profile
             $topnav->add(new Link("profile.php", "My profile"));
             
             // Alcoholics can see patrons and experts and can report themselves
             if($source->role == "alcoholic") {
-                $topnav->add(
-                    new Link("members.php?type=patrons", "My patrons")
+                $link = plink("members.php", array("type" => "patrons"));
+                $topnav->add(new Link($link, "My patrons"));
+                
+                $link = plink("members.php", array("type" => "experts"));
+                $topnav->add(new Link($link, "My experts"));
+                
+                $link = plink(
+                    "new_report.php", array("target" => $source->email)
                 );
-                $topnav->add(
-                    new Link("members.php?type=experts", "My experts")
-                );
-                $topnav->add(
-                    new Link(
-                        "new_report.php?target=$source->email", "New report"
-                    )
-                );
+                $topnav->add(new Link($link, "New report"));
             }
             
             // Patrons and experts see alcoholics
             if($source->role == "patron" || $source->role == "expert") {
-                $topnav->add(
-                    new Link("members.php?type=alcoholics", "My alcoholics")
-                );
+                $link = plink("members.php", array("type" => "alcoholics"));
+                $topnav->add(new Link($link, "My alcoholics"));
             }
             
             // Experts can report
             if($source->role == "expert") {
-                $topnav->add(
-                    new Link(
-                        "members.php?type=alcoholics", "New report"
-                    )
-                );
+                $link = plink("members.php", array("type" => "alcoholics"));
+                $topnav->add(new Link($link, "New report"));
             }
 
             // Everybody can see sessions and AA members, can edit profile or
@@ -76,7 +71,8 @@ class Page {
             $topnav->add(new Link("sessions.php", "Sessions"));
             $topnav->add(new Link("members.php", "AA members"));
             $topnav->add(new Link("signup.php", "Edit profile"));
-            $topnav->add(new Link("index.php?logout=yes", "Logout"));
+            $link = plink("index.php", array("logout" => "yes"));
+            $topnav->add(new Link($link, "Logout"));
         }
 
         return $topnav->html();

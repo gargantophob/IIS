@@ -19,7 +19,6 @@ require_once "html.php";
 session_start();
 authorized_access();
 
-
 // Extract regime and target identifier
 $target = $regime = null;
 if($_SERVER["REQUEST_METHOD"] == "GET") {

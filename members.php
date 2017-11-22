@@ -3,6 +3,11 @@
 /**
  * @file members.php
  * All members page.
+ * 
+ * Protocol:
+ * [G] type - one of {all, alcoholics, patrons, experts}
+ * Authorized access.
+ * 
  * @author xandri03
  */
 
@@ -11,17 +16,16 @@ require_once "entity.php";
 require_once "html.php";
 
 session_start();
-restrict_page_access();
+authorized_access();
 
 // Retrieve context
-$source = Person::look_up($_SESSION["user"]);
-
-// Handle manual redirections
-$type = "all";
+$source = Person::look_up(session_data("user"));
+$type = null;
 if($_SERVER["REQUEST_METHOD"] == "GET") {
-    if(isset($_GET["type"])) {
-        $type = $_GET["type"];
-    }
+    $type = get_data("type");
+}
+if($type == null) {
+    $type = "all";
 }
 
 // Initialize the page
@@ -38,13 +42,12 @@ if($type == "alcoholics") {
     $emails = Person::all();
 }
 
-$table = new Table();
-$table->add(array(new Text("Person"), new Text("Role")));
+$table = new Table(array(new Text("Person"), new Text("Role")));
 foreach($emails as $email) {
     $person = Person::look_up($email);
-    $name = new Link("profile.php?target=$email", $person->name);
+    $link = plink("profile.php", array("target" => $email));
+    $name = new Link($link, $person->name);
     $role = new Text($person->role);
-    //$report = new Link("new_report.php?target=$email", "Report");
     $table->add(array($name, $role));
 }
 $page->add($table);
