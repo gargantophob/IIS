@@ -4,10 +4,8 @@
  * @file signup.php
  * Sign up (profile edit) page.
  * 
- * Interface:
+ * Protocol:
  * [S] user     - edit user profile
- * [G] logout   - logout flag
- * 
  * 
  * @author xandri03
  */
@@ -23,10 +21,10 @@ $email = $password = $name = $birthdate = $gender = $picture = $role = "";
 $education = $practice = "";
 $error = "";
 
-if(session_data("user") != null) {
+$email = session_data("user");
+if($email != null) {
     // Preset user data
     $authorized = TRUE;
-    $email = session_data("user");
     $person = Person::look_up($email);
     $name = $person->name;
     $birthdate = $person->birthdate;
@@ -145,7 +143,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // Process formt
-    if(form_process() === TRUE) {
+    if(form_process()) {
         // Preprocess input data
         if($gender == "") {
             $gender = null;
@@ -291,13 +289,12 @@ $input = new Input("submit", "submit");
 $input->set("value", "Submit");
 $form->add($input);
 
-// Profile deletion button
-$input = new Input("submit", "delete");
-$input->set("value", "Delete profile");
-if(!$authorized) {
-    $input->set("hidden", "true");
+// Account deletion button
+if($authorized) {
+    $input = new Input("submit", "delete");
+    $input->set("value", "Delete profile");
+    $form->add($input);
 }
-$form->add($input);
 
 // Error message
 $form->add_error($error);

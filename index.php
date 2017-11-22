@@ -4,7 +4,7 @@
  * @file index.php
  * Sign in page.
  * 
- * Interface:
+ * Protocol:
  * [G] logout   - logout flag
  * [S] user     - redirect to profile page
  * 
@@ -41,8 +41,7 @@ if(session_data("user") != null) {
 $email = $error = "";
 
 /**
- * Form processor. Check username and his password.
- * @return  TRUE on success, FALSE otherwise
+ * Form processor.
  */
 function form_process() {
     global $email, $error;
@@ -59,7 +58,7 @@ function form_process() {
 // Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     // Process the form
-    if(form_process() === TRUE) {
+    if(form_process()) {
         // Authentication success
         $_SESSION["user"] = $email;
         redirect("profile.php");
