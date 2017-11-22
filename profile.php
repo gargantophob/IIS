@@ -3,28 +3,34 @@
 /**
  * @file profile.php
  * Profile page.
+ * 
+ * Protocol:
+ * [S] user     - authorized user
+ * [G] target   - target page email
+ * 
+ * Authorized access.
+ * 
  * @author xandri03
  */
 
-/* INTERFACE:
- * 
- */
 require_once "library.php";
 require_once "entity.php";
 require_once "html.php";
 
 session_start();
-restrict_page_access();
+authorized_access();
 
 // Read source (session) and target
-$source = Person::look_up($_SESSION["user"]);
+$source = Person::look_up(session_data("user"));
 
 // Manual redirections
 if($_SERVER["REQUEST_METHOD"] == "GET") {
     $target = get_data("target");
     if($target != null) {
         $target = Person::look_up($email);
-    } else {
+    }
+    
+    if($target == null) {
         $target = $source;
     }
 }
@@ -42,7 +48,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         $source->drop($target->email);
     }
     if(post_data("meet") != null) {
-        $par =  array("regime" => "meeting", "target" => $target->email);
+        // Select the date
+        $par = array("regime" => "meeting", "target" => $target->email);
         redirect(plink("date_selector.php", $par));
     }
 }
@@ -73,7 +80,7 @@ $page->add(new Text("Gender: " . $gender));
 $page->newline();
 $page->add(new Text("Role: " . $target->role));
 $page->newline();
-$page->add(new Image("image.php?user=$target->email"));
+$page->add(new Image(plink("image.php", array("target" => $target->email))));
 $page->newline();
 $page->newline();
 
@@ -101,10 +108,8 @@ if($source == $target) {
             $session = Session::look_up($session);
             $date = new Text($session->date);
             $place = new Text(Place::look_up($session->place)->address);
-            $link = new Link(
-                plink("session.php", array("session" => $session->id)),
-                "more info..."
-            );
+            $link = plink("session.php", array("session" => $session->id));
+            $link = new Link($link, "more info...");
             $table->add(array($date, $place, $link));
         }
         $page->add($table);
@@ -119,10 +124,10 @@ if($source == $target) {
             $page->add(new Text("No upcoming meetings: "));
             $type = $source->role == "alcoholic" ? "patrons" : "alcoholics";
             $link = plink("members.php", array("type" => $type));
-            $page->add(new Link($link, "suggest one."));
+            $page->add(new Link($link, "arrange one."));
         } else {
             $page->add(new Text("Upcoming meetings:"));
-            $table = new Table(array(new Text("Patron"), new Text("Date")));
+            $table = new Table(array(new Text("Name"), new Text("Date")));
             foreach($meetings as $meeting) {
                 $meeting = Meeting::look_up($meeting);
                 if($source->role == "alcoholic") {
@@ -159,9 +164,9 @@ if($target->role == "alcoholic") {
         } else {
             $reporter = Person::look_up($reporter);
             $link = plink("profile.php", array("target" => $reporter->email));
-            $link = new Link($link, $reporter->name);
+            $reporter = new Link($link, $reporter->name);
         }
-        $table->add(array($date, $bac, $link));
+        $table->add(array($date, $bac, $reporter));
     }
     $page->add($table);	
     $page->newline();
@@ -170,17 +175,10 @@ if($target->role == "alcoholic") {
 // A bunch of buttons
 $form = new Form();
 
-// Hidden target email parameter for POST transitions
+// Hidden target
 $input = new Input("text", "target");
 $input->set("id", "target");
 $input->set("value", $target->email);
-$input->set("hidden", "true");
-$form->add($input);
-
-// Hidden target name parameter for JS
-$input = new Input("text", "name");
-$input->set("id", "name");
-$input->set("value", $target->name);
 $input->set("hidden", "true");
 $form->add($input);
 
@@ -192,25 +190,22 @@ if($target != $source) {
             // Support stop button
             $input = new Input("submit", "support_stop");
             $input->set("value", "Stop supporting");
-            $form->add($input);
         } else {
             // Support start button
             $input = new Input("submit", "support_start");
             $input->set("value", "Start supporting");
-            $form->add($input);
         }
+        $form->add($input);
     }
 
-    // Create an appointment button
-    if(
-        (
-            $source->role == "alcoholic"
-            && array_search($target->email, $source->patrons()) !== FALSE
-        ) || (
-            $source->role == "patron"
-            && array_search($target->email, $source->alcoholics()) !== FALSE
-        )
-    ) {
+    // Arrange an appointment between alcoholic and patron button
+    $condition = FALSE;
+    if($source->role == "alcoholic") {
+        $condition = array_search($target->email, $source->patrons()) !== FALSE;
+    } elseif($source->role == "patron") {
+        $condition = array_search($target->email, $source->alcoholics()) !== FALSE;
+    }
+    if($condition) {
         $input = new Input("submit", "meet");
         $input->set("value", "Meet");
         $form->add($input);

@@ -88,8 +88,8 @@ function logout() {
 /**
  * Restrict page access to authorized users.
  */
-function restrict_page_access() {
-    if(empty($_SESSION["user"])) {
+function authorized_access() {
+    if(session_data("user") == null) {
         logout();
     }
 }

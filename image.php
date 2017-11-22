@@ -3,23 +3,34 @@
 /**
  * @file image.php
  * Image container.
+ * 
+ * Protocol:
+ * [G] target - target user email
+ * 
+ * Authorized access.
+ * 
  * @author xandri03
  */
 
-/**
- * Interface:
- * [GET] user - TODO
- */
 require_once "library.php";
 require_once "entity.php";
 
-// Load the image using GET
-$user = get_data("user");
-if($user == null) {
-    recover();
+session_start();
+authorized_access();
+
+$picture = null;
+
+// Fetch user email
+$target = get_data("target");
+if($target != null) {
+    // Look user up
+    $target = Person::look_up($target);
+    if($target != null) {
+        // Extract image
+        $picture = $target->picture;
+    }
 }
 
-$picture = Person::look_up($user)->picture;
 if($picture == null) {
 	// Load default image
 	$picture = file_get_contents("./images/default.jpg");
