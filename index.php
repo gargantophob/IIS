@@ -17,6 +17,7 @@
 // additional TODOs:
 // html.php: fancy tables
 // html.php: fancy forms
+// html.php: skip hidden input forms
 // signup.php/html.php: textarea for experts
 // signup.php: picture context save
 
