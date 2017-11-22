@@ -3,6 +3,11 @@
 /**
  * @file session.php
  * Session info.
+ * 
+ * Protocol:
+ * [G] session  - session identifier
+ * Authorized access.
+ * 
  * @author xandri03
  */
  
@@ -11,34 +16,31 @@ require_once "entity.php";
 require_once "html.php";
 
 session_start();
-restrict_page_access();
+authorized_access();
 
-$session = null;
+// Retrieve context
 $source = Person::look_up($_SESSION["user"]);
+$session = null;
 if($_SERVER["REQUEST_METHOD"] == "GET") {
-    if(isset($_GET["session"])) {
-        $session = Session::look_up($_GET["session"]);
-        if($session == null) {
-            // Invalid session identifier
-            // TODO redirect to all sessions
-            redirect("sessions.php");
-        }
-    } else {
-        // TODO redirect to all sessions
-        redirect("sessions.php");
-    }
+    $session = get_data("session");
+    $session = Session::look_up($_GET["session"]);
+}
+if($session == null) {
+    // Invalid session identifier
+    redirect("sessions.php");
 }
 
 // Form handler
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     // Extract session
-    $session = Session::look_up($_POST["session"]);
+    $session = post_data("session");
+    
     // Differentiate buttons
-    if(isset($_POST["enroll"])) {
-        $source->enroll($session->id);
+    if(post_data("enroll") != null) {
+        $source->enroll($session);
     }
-    if(isset($_POST["unenroll"])) {
-        $source->unenroll($session->id);
+    if(post_data("unenroll") != null) {
+        $source->unenroll($session);
     }
 }
 
@@ -46,7 +48,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 $page = new Page();
 
 // Print session info
-$page->add(new Text("Place: " . Place::look_up($session->place)->address));
+$page->add(new Text("Where: " . Place::look_up($session->place)->address));
 $page->newline();
 
 $page->add(new Text("Date: " . $session->date));
@@ -54,31 +56,36 @@ $page->newline();
 
 $page->add(new Text("Leader: "));
 $leader = Person::look_up($session->leader);
-$page->add(new Link("profile.php?target=$leader->email", $leader->name));
+$link = plink("profile.php", array("target", $leader->email));
+$page->add(new Link($link, $leader->name));
 $page->newline();
 
 // Print members
-$table = new Table(array(new Text("members")));
 $members = $session->members();
-foreach($members as $member) {
-    $person = Person::look_up($member);
-    $link = new Link(
-        "profile.php?target=$person->email",
-        $person->name
-    );
-    $table->add(array($link));
+if(count($members) == 0) {
+    $page->add(new Text("No members yet."));
+} else {
+    $table = new Table(array(new Text("Members")));
+    foreach($members as $member) {
+        $person = Person::look_up($member);
+        $link = plink("profile.php", array("target", $person->email));
+        $link = new Link($link, $person->name);
+        $table->add(array($link));
+    }
+    $page->add($table);
 }
-$page->add($table);
-
 
 // Enroll/unenroll buttons
 $form = new Form();
+$page->add($form);
 
+// Hidden session id
 $input = new Input("text", "session");
 $input->set("value", "$session->id");
 $input->set("hidden", "true");
 $form->add($input);
 
+// Check membership
 if(array_search($source->email, $members) !== FALSE) {
     $name = "unenroll";
     $value = "Unenroll";
@@ -89,9 +96,6 @@ if(array_search($source->email, $members) !== FALSE) {
 $input = new Input("submit", $name);
 $input->set("value", $value);
 $form->add($input);
-
-$page->add($form);
-$page->newline();
 
 // Render the page
 $page->render();
