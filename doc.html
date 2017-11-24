@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>Projekt IIS</title>
+    <style type="text/css">
+    	table { border-collapse: collapse; }
+    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    	dt { font-weight: bold; margin-top: 0.5em; }
+    </style>
+</head>
+<body>
+
+<h1>Klub Anonymních Alkoholiků (Alcoholics Anonymous)</h1>
+
+<dl>
+	<dt>Autoři</dt>
+	<dd>Roman Andriushchenko
+	    <a href="mailto:xandri03@stud.fit.vutbr.cz">xandri03@stud.fit.vutbr.cz</a> - abstraktní databázová vrstva, správa účtů, evidence vypitého alkoholu
+	</dd>
+	<dd>Jakub Semrič
+	    <a href="mailto:xsemri00@stud.fit.vutbr.cz">xsemri00@stud.fit.vutbr.cz</a> - 
+		definice uživatelského vzhledu, správa sezení
+	</dd>
+	<dt>URL aplikace</dt>
+	<dd><a href="http://www.stud.fit.vutbr.cz/~xandri03/IIS/">http://www.stud.fit.vutbr.cz/~xandri03/IIS/</a></dd>
+</dl>
+
+<h2>Uživatelé systému pro testování</h2>
+<table>
+<tbody><tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+<tr><td>stewart@mail.com</td><td>asdfasdf</td><td>Alkoholik</td></tr>
+<tr><td>welles@mail.com</td><td>asdfasdf</td><td>Patron</td></tr>
+<tr><td>young@mail.com</td><td>asdfasdf</td><td>Expert</td></tr>
+</tbody></table>
+
+<h2>Implementace</h2>
+<p>Daná aplikace vychází z návrhu v předmětu IDS (viz. erd-ucd.pdf) s následujicími změnami:<p>
+<ul>
+	<li><b>UC</b>: v systému není administrátor; každý má právo založit/editovat/smazat účet dle libosti</li>
+	<li><b>UC</b>: každý má právo založit sezení; zakladatel sezení automaticky stává vedoucím, avšak nemusí daného sezení přímo zúčastnit</li>
+	<li><b>ER</b>: každá osoba má unikátní identifikátor ve tvaru emailové adresy, má heslo a může nahrát profilový obrázek</li>
+</ul>
+<p>dané změny nesou pouze logický charakter a neomezují funkcionalitu systému. Následuje popis jednotlivých skriptů:</p>
+<ul>
+	<li>index.php - vstupní stránka pro přihlášení</li>
+	<li>signup.php - registrace v systému, editace/mazání účtu</li>
+	<li>profile.php, members.php - informace o uživatelích; realizace setkání mezi patrony a alkoholiky</li>
+	<li>sessions.php, session.php - správa sezení</li>
+	<li>places.php - správa míst pro sezení</li>
+	<li>new_report.php, alcohol_selector.php - evidence vypitého alkoholu</li>
+	<li>html.php, styles.css - definice uživatelského vzhledu</li>
+	<li>database.php, entity.php - abstraktní databázová vrstva</li>
+	<li>library.php, image.php - ostatní pomocné procedury</li>
+</ul>
+
+<h2>Instalace</h2>
+<ul>
+<li>pro instalaci stačí rozbalit archiv (unzip xsemri00.zip)</li>
+<li>reinicializovat databázi lze spuštěním skriptu sql.sh</li>
+<li>testováno a provozováno na serveru <b>eva</b> (PHP 7.1)</li>
+</ul>
+
+<h2>Známé problémy</h2>
+<p>Z časových důvodů nebyl implementován systém pro zasílání připomínek alkoholikům kteří se během posledních tří měsícu nezúčastnili žádného sezení.</p>
+
+</body></html>
