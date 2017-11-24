@@ -221,7 +221,6 @@ class DB {
     public static $person_attends;
     public static $alcohol;
     public static $report;
-    public static $alcohol_reported;
 }
 
 DB::$person = new DBTable(
@@ -288,10 +287,5 @@ DB::$report = new DBTable(
     array("id", "date", "bac", "alcoholic", "expert")
 );
 DB::$report->auto_increment();
-
-DB::$alcohol_reported = new DBTable(
-    "alcohol_reported",
-    array("alcohol", "report")
-);
 
 ?>

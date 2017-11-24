@@ -104,62 +104,109 @@ CREATE TABLE report (
 
 -- Populate
 INSERT INTO person (email, password, name, birthdate, gender, picture) VALUES
-	('allen@a.a', 'a', 'Woody Allen', NULL, NULL, NULL),
-	('blanchett@a.a', 'a', 'Cate Blanchett', NULL, NUll, NULL),
-	('caine@a.a', 'a', 'Michael Caine', NULL, NUll, NULL),
-	('chaplin@a.a', 'a', 'Charles Chaplin', NULL, NUll, NULL),
-	('cuaron@a.a', 'a', 'Alfonso Cuaron', NULL, NUll, NULL),
-	('deakins@a.a', 'a', 'Roger Deakins', NULL, NUll, NULL),
-	('freeman@a.a', 'a', 'Morgan Freeman', NULL, NUll, NULL),
-	('hanks@a.a', 'a', 'Tom Hanks', NULL, NUll, NULL),
-	('hepburn@a.a', 'a', 'Audrey Hepburn' , NULL, NUll, NULL),
-	('lubezki@a.a', 'a', 'Emmanuel Lubezki' , NULL, NUll, NULL),
-	('niro@a.a', 'a', 'Robert de Niro' , NULL, NUll, NULL),
-	('nolan@a.a', 'a', 'Christopher Nolan' , NULL, NUll, NULL),
-	('oldman@a.a', 'a', 'Gary Oldman' , NULL, NUll, NULL),
-	('otoole@a.a', 'a', 'Peter OToole' , NULL, NUll, NULL),
-	('pacino@a.a', 'a', 'Al Pacino' , NULL, NUll, NULL),
-	('pfister@a.a', 'a', 'Wally Pfister' , NULL, NUll, NULL),
-	('reed@a.a', 'a', 'Donna Reed' , NULL, NULL, NULL),
-	('sandgren@a.a', 'a', 'Linus Sandgren' , NULL, NULL, NULL),
-	('scorcese@a.a', 'a', 'Martin Scorcese' , NULL, NULL, NULL),
-	('stewart@a.a', 'a', 'James Stewart' , NULL, NULL, NULL),
-	('villeneuve@a.a', 'a', 'Denis Villeneuve' , NULL, NULL, NULL),
-	('welles@a.a', 'a', 'Orson Welles' , NULL, NULL, NULL),
-	('young@a.a', 'a', 'Freddie Young' , NULL, NULL, NULL)
+	('blanchett@mail.com', 'asdfasdf', 'Cate Blanchett', '1969-05-14', 'F', NULL),
+	('caine@mail.com', 'asdfasdf', 'Michael Caine', '1933-03-14', 'M', NULL),
+	('freeman@mail.com', 'asdfasdf', 'Morgan Freeman', '1937-06-01', 'M', NULL),
+	('hanks@mail.com', 'asdfasdf', 'Tom Hanks', '1956-07-09', 'M', NULL),
+	('hepburn@mail.com', 'asdfasdf', 'Audrey Hepburn' , '1929-05-04', 'F', NULL),
+	('niro@mail.com', 'asdfasdf', 'Robert de Niro' , '1943-08-17', 'M', NULL),
+	('oldman@mail.com', 'asdfasdf', 'Gary Oldman' , '1958-03-21', 'M', NULL),
+	('otoole@mail.com', 'asdfasdf', 'Peter OToole' , '1932-08-02', 'M', NULL),
+	('pacino@mail.com', 'asdfasdf', 'Al Pacino' , '1940-04-25', 'M', NULL),
+	('reed@mail.com', 'asdfasdf', 'Donna Reed' , '1921-01-27', 'F', NULL),
+	('stewart@mail.com', 'asdfasdf', 'James Stewart' , '1908-05-20', 'M', NULL),
+	('allen@mail.com', 'asdfasdf', 'Woody Allen', NULL, 'M', NULL),
+	('chaplin@mail.com', 'asdfasdf', 'Charles Chaplin', NULL, 'M', NULL),
+	('cuaron@mail.com', 'asdfasdf', 'Alfonso Cuaron', NULL, 'M', NULL),
+	('deakins@mail.com', 'asdfasdf', 'Roger Deakins', NULL, 'M', NULL),
+	('lubezki@mail.com', 'asdfasdf', 'Emmanuel Lubezki' , NULL, 'M', NULL),
+	('nolan@mail.com', 'asdfasdf', 'Christopher Nolan' , NULL, 'M', NULL),
+	('pfister@mail.com', 'asdfasdf', 'Wally Pfister' , NULL, 'M', NULL),
+	('sandgren@mail.com', 'asdfasdf', 'Linus Sandgren' , NULL, 'M', NULL),
+	('scorcese@mail.com', 'asdfasdf', 'Martin Scorcese' , NULL, 'M', NULL),
+	('villeneuve@mail.com', 'asdfasdf', 'Denis Villeneuve' , NULL, 'M', NULL),
+	('welles@mail.com', 'asdfasdf', 'Orson Welles' , NULL, 'M', NULL),
+	('young@mail.com', 'asdfasdf', 'Freddie Young' , NULL, 'M', NULL)
 ;
 INSERT INTO alcoholic (email) VALUES
-	('blanchett@a.a'), ('caine@a.a'), ('freeman@a.a'), ('hanks@a.a'),
-	('hepburn@a.a'), ('niro@a.a'), ('oldman@a.a'), ('otoole@a.a'), 
-	('pacino@a.a'), ('reed@a.a'), ('stewart@a.a')
+	('blanchett@mail.com'), ('caine@mail.com'), ('freeman@mail.com'),
+	('hanks@mail.com'), ('hepburn@mail.com'), ('niro@mail.com'),
+	('oldman@mail.com'), ('otoole@mail.com'), ('pacino@mail.com'),
+	('reed@mail.com'), ('stewart@mail.com')
 ;
 INSERT INTO patron (email) VALUES
-	('allen@a.a'), ('chaplin@a.a'), ('cuaron@a.a'), ('nolan@a.a'), 
-	('scorcese@a.a'), ('villeneuve@a.a'), ('welles@a.a')
+	('allen@mail.com'), ('chaplin@mail.com'), ('cuaron@mail.com'),
+	('nolan@mail.com'), ('scorcese@mail.com'), ('villeneuve@mail.com'),
+	('welles@mail.com')
 ;
 INSERT INTO expert (email, education, practice) VALUES
-	('deakins@a.a', NULL, NULL), ('lubezki@a.a', NULL, NULL), 
-	('pfister@a.a', NULL, NULL), ('sandgren@a.a', NULL, NULL),
-	('young@a.a', NULL, NULL)
+	('deakins@mail.com', NULL, NULL), ('lubezki@mail.com', NULL, NULL), 
+	('pfister@mail.com', NULL, NULL), ('sandgren@mail.com', NULL, NULL),
+	('young@mail.com', NULL, NULL)
 ;
 
 INSERT INTO patron_supports (patron, alcoholic) VALUES
-	('allen@a.a', 'blanchett@a.a'), ('allen@a.a', 'caine@a.a'),
-	('chaplin@a.a', 'freeman@a.a'), ('chaplin@a.a', 'hanks@a.a'),
-	('cuaron@a.a', 'hepburn@a.a'), ('cuaron@a.a', 'niro@a.a'),
-	('nolan@a.a', 'oldman@a.a'), ('nolan@a.a', 'otoole@a.a'),
-	('scorcese@a.a', 'pacino@a.a'), ('scorcese@a.a', 'reed@a.a'),
-	('villeneuve@a.a', 'stewart@a.a'), ('villeneuve@a.a', 'blanchett@a.a'),
-	('welles@a.a', 'freeman@a.a'), ('welles@a.a', 'hepburn@a.a')
+	('allen@mail.com', 'blanchett@mail.com'),
+	('allen@mail.com', 'caine@mail.com'),
+	('allen@mail.com', 'freeman@mail.com'),
+	('allen@mail.com', 'hepburn@mail.com'),
+	('chaplin@mail.com', 'freeman@mail.com'),
+	('chaplin@mail.com', 'hanks@mail.com'),
+	('chaplin@mail.com', 'hepburn@mail.com'),
+	('chaplin@mail.com', 'caine@mail.com'),
+	('cuaron@mail.com', 'hepburn@mail.com'),
+	('cuaron@mail.com', 'niro@mail.com'),
+	('cuaron@mail.com', 'oldman@mail.com'),
+	('cuaron@mail.com', 'hanks@mail.com'),
+	('nolan@mail.com', 'oldman@mail.com'),
+	('nolan@mail.com', 'otoole@mail.com'),
+	('nolan@mail.com', 'pacino@mail.com'),
+	('nolan@mail.com', 'niro@mail.com'),
+	('scorcese@mail.com', 'pacino@mail.com'),
+	('scorcese@mail.com', 'reed@mail.com'),
+	('scorcese@mail.com', 'stewart@mail.com'),
+	('scorcese@mail.com', 'otoole@mail.com'),
+	('villeneuve@mail.com', 'stewart@mail.com'),
+	('villeneuve@mail.com', 'blanchett@mail.com'),
+	('villeneuve@mail.com', 'freeman@mail.com'),
+	('villeneuve@mail.com', 'reed@mail.com'),
+	('welles@mail.com', 'freeman@mail.com'),
+	('welles@mail.com', 'hepburn@mail.com'),
+	('welles@mail.com', 'hanks@mail.com'),
+	('welles@mail.com', 'blanchett@mail.com')
 ;
 INSERT INTO expert_supervises (expert, alcoholic) VALUES
-	('deakins@a.a', 'oldman@a.a'), ('deakins@a.a', 'pacino@a.a'),
-	('lubezki@a.a', 'stewart@a.a'), ('lubezki@a.a', 'reed@a.a'),
-	('pfister@a.a', 'otoole@a.a'), ('pfister@a.a', 'niro@a.a'),
-	('sandgren@a.a', 'hanks@a.a'), ('sandgren@a.a', 'caine@a.a'),
-	('young@a.a', 'stewart@a.a'), ('young@a.a', 'hepburn@a.a')
+	('deakins@mail.com', 'blanchett@mail.com'),
+	('deakins@mail.com', 'oldman@mail.com'),
+	('deakins@mail.com', 'pacino@mail.com'),
+	('lubezki@mail.com', 'stewart@mail.com'),
+	('lubezki@mail.com', 'reed@mail.com'),
+	('lubezki@mail.com', 'caine@mail.com'),
+	('pfister@mail.com', 'otoole@mail.com'),
+	('pfister@mail.com', 'niro@mail.com'),
+	('pfister@mail.com', 'freeman@mail.com'),
+	('sandgren@mail.com', 'hanks@mail.com'),
+	('sandgren@mail.com', 'caine@mail.com'),
+	('sandgren@mail.com', 'niro@mail.com'),
+	('young@mail.com', 'stewart@mail.com'),
+	('young@mail.com', 'reed@mail.com'),
+	('young@mail.com', 'hepburn@mail.com')
 ;
 
 INSERT INTO alcohol (type, origin) VALUES
-	('wine', 'France'), ('beer', 'Germany')
+	('wine', 'France'), ('beer', 'Germany'), ('beer', 'Czechia'),
+	('rum', 'Cuba'), ('chacha', 'Georgia'), ('vodka', 'Russia'),
+	('gin', 'England')
 ;
+
+INSERT INTO report (date, bac, alcohol, alcoholic, expert) VALUES
+	('2017-11-24', 0.01, 1, 'blanchett@mail.com', NULL),
+	('2017-11-23', 0.02, 2, 'oldman@mail.com', 'deakins@mail.com'),
+	('2017-11-22', 0.04, 3, 'stewart@mail.com', 'lubezki@mail.com'),
+	('2017-11-21', 0.08, 4, 'stewart@mail.com', NULL),
+	('2017-11-20', 0.16, 5, 'niro@mail.com', 'pfister@mail.com'),
+	('2017-11-19', 0.08, 6, 'reed@mail.com', NULL),
+	('2017-11-18', 0.16, 7, 'hepburn@mail.com', 'young@mail.com'),
+	('2017-11-17', 0.16, 6, 'niro@mail.com', NULL)
+;
+

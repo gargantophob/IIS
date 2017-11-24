@@ -63,24 +63,16 @@ if($gender == null) {
 } else {
     $gender = $gender == "M" ? "Male" : "Female";
 }
-
-// Initialize the page
-$page = new Page();
-
-// Print general data
-$page->add(new Text("Name: " . $target->name));
-$page->newline();
-$page->add(new Text("Email: " . $target->email));
-$page->newline();
-$page->add(new Text("Birthdate: " . $birthdate));
-$page->newline();
-$page->add(new Text("Gender: " . $gender));
-$page->newline();
-$page->add(new Text("Role: " . $target->role));
-$page->newline();
-$page->add(new Image(plink("image.php", array("target" => $target->email))));
-$page->newline();
-$page->newline();
+if($target->role == "expert") {
+    $education = $target->education;
+    if($education == null) {
+        $education = "?";
+    }
+    $practice = $target->practice;
+    if($practice == null) {
+        $practice = "?";
+    }
+}
 
 // Pick correct possessive pronoun
 if($source == $target) {
@@ -90,6 +82,30 @@ if($source == $target) {
 } else {
     $pa = "His";
 }
+
+// Initialize the page
+$page = new Page();
+
+// Print general data
+$page->add(new Text("Name: " . $target->name));
+$page->newline();
+$page->add(new Text("Email: " . $target->email));
+$page->newline();
+$page->add(new Text("Role: " . $target->role));
+$page->newline();
+$page->add(new Text("Birthdate: " . $birthdate));
+$page->newline();
+$page->add(new Text("Gender: " . $gender));
+$page->newline();
+if($target->role == "expert") {
+    $page->add(new Text("Education: " . $education));
+    $page->newline();
+    $page->add(new Text("Practice: " . $practice));
+    $page->newline();    
+}
+$page->add(new Image(plink("image.php", array("target" => $target->email))));
+$page->newline();
+$page->newline();
 
 if($source == $target) {
     // List future sessions
