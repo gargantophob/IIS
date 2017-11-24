@@ -64,7 +64,6 @@ $page->render();
     // New place addition
 	var meet = document.getElementById("new_place");
 	meet.onclick = function() {
-		var success = false;
 		var address;
 		while(true) {
 			address = prompt(
@@ -77,6 +76,7 @@ $page->render();
 			if(address != "") {
 				// Success
 				window.location.replace("places.php?address=" + address);
+				break;
 			}
 		}
 	}
