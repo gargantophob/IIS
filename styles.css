@@ -66,6 +66,42 @@ label {
     float: left;
 }
 
-table, th, td {
-    border: 1px solid black;
+table {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table td, table th {
+    border: 2px solid #111111;
+    padding: 8px;
+}
+
+table tr:nth-child(even){background-color: #ffffff;}
+
+table tr:hover {background-color: #ddd;}
+
+table td {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: left;
+}
+
+table a {
+    float: left;
+    color: black;
+    display: block;
+    text-decoration: none;
+}
+
+table a:hover:not(.active) {
+    color: orange;
+}
+
+table th {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: left;
+    background-color: navy;
+    color: white;
 }
