@@ -42,7 +42,7 @@ if($type == "alcoholics") {
     $emails = Person::all();
 }
 
-$table = new Table(array(new Text("Person"), new Text("Role")));
+$table = new Table(array(new Text("Name"), new Text("Role")));
 foreach($emails as $email) {
     $person = Person::look_up($email);
     $link = plink("profile.php", array("target" => $email));

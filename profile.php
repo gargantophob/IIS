@@ -111,8 +111,10 @@ if($source == $target) {
     // List future sessions
     $sessions = $source->sessions();
     if(count($sessions) == 0) {
-        $page->add(new Text("No upcoming sessions: enroll "));
-        $page->add(new Link("sessions.php", "here."));
+        $page->add(new Text("No upcoming sessions:  "));
+        $link = new Link("sessions.php", "enroll");
+        $link->set("class", "button");
+        $page->add($link);
     } else {
         $page->add(new Text("Upcoming sessions:"));
         $table = new Table(
@@ -230,6 +232,7 @@ if($target != $source) {
             $input = new Input("submit", "support_start");
             $input->set("value", "Start supporting");
         }
+        $input->set("class", "button");
         $form->add($input);
     }
 
@@ -243,6 +246,7 @@ if($target != $source) {
     if($condition) {
         $input = new Input("submit", "meet");
         $input->set("value", "Meet");
+        $input->set("class", "button");
         $form->add($input);
     }
 }
