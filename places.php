@@ -53,6 +53,7 @@ $page->add($form);
 $input = new Input("button", "new_place");
 $input->set("id", "new_place");
 $input->set("value", "Add new place");
+$input->set("class", "button");
 $form->add($input);
 
 // Render the page

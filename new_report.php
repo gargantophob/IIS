@@ -94,6 +94,7 @@ $form->add($input);
 // Submit
 $input = new Input("submit", "submit");
 $input->set("value", "Continue");
+$input->set("class", "button");
 $form->add($input);
 
 // Error message

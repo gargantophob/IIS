@@ -287,12 +287,14 @@ $form->add($block);
 // Submit
 $input = new Input("submit", "submit");
 $input->set("value", "Submit");
+$input->set("class", "button");
 $form->add($input);
 
 // Account deletion button
 if($authorized) {
     $input = new Input("submit", "delete");
     $input->set("value", "Delete profile");
+    $input->set("class", "button");
     $form->add($input);
 }
 

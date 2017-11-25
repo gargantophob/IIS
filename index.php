@@ -95,6 +95,7 @@ $form->add($input);
 // Submit button
 $input = new Input("submit", "submit");
 $input->set("value", "Log in");
+$input->set("class", "button");
 $form->add($input);
 
 // Error message
@@ -102,7 +103,9 @@ $form->add_error($error);
 
 // Sign up link
 $page->add(new Text("New here? "));
-$page->add(new Link("signup.php", "Sign up!"));
+$link=new Link("signup.php", "Sign up!");
+$link->set("class","button");
+$page->add($link);
 
 // Render the page
 $page->render();

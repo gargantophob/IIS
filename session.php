@@ -96,6 +96,7 @@ if(array_search($source->email, $members) !== FALSE) {
 }
 $input = new Input("submit", $name);
 $input->set("value", $value);
+$input->set("class", "button");
 $form->add($input);
 
 // Render the page

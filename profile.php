@@ -3,11 +3,11 @@
 /**
  * @file profile.php
  * Profile page.
- * 
+ *
  * Protocol:
  * [G] target   - target page email
  * Authorized access.
- * 
+ *
  * @author xandri03
  */
 
@@ -27,7 +27,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET") {
     if($target != null) {
         $target = Person::look_up($target);
     }
-    
+
     if($target == null) {
         $target = $source;
     }
@@ -101,7 +101,7 @@ if($target->role == "expert") {
     $page->add(new Text("Education: " . $education));
     $page->newline();
     $page->add(new Text("Practice: " . $practice));
-    $page->newline();    
+    $page->newline();
 }
 $page->add(new Image(plink("image.php", array("target" => $target->email))));
 $page->newline();
@@ -130,7 +130,7 @@ if($source == $target) {
     }
     $page->newline();
     $page->newline();
-        
+
     // List future meetings
     if($source->role != "expert") {
         $meetings = $source->meetings();
@@ -138,7 +138,9 @@ if($source == $target) {
             $page->add(new Text("No upcoming meetings: "));
             $type = $source->role == "alcoholic" ? "patrons" : "alcoholics";
             $link = plink("members.php", array("type" => $type));
-            $page->add(new Link($link, "arrange one."));
+            $link = new Link($link, "arrange one.");
+            $link->set("class","button");
+            $page->add($link);
         } else {
             $page->add(new Text("Upcoming meetings:"));
             $table = new Table(array(new Text("Name"), new Text("Date")));
@@ -165,7 +167,7 @@ if($source == $target) {
 if($target->role == "alcoholic") {
     // Get reports
     $reports = $target->reports();
-    
+
     // Get last report date
     $last = end($reports);
     if($last === FALSE) {
@@ -197,13 +199,14 @@ if($target->role == "alcoholic") {
             $reporter = Person::look_up($reporter);
             $link = plink("profile.php", array("target" => $reporter->email));
             $reporter = new Link($link, $reporter->name);
+            $reporter->set("class","button");
         }
         $table->add(array($date, $bac, $reporter));
     }
-    $page->add($table);	
+    $page->add($table);
     $page->newline();
 }
-    
+
 // A bunch of buttons
 $form = new Form();
 
@@ -255,7 +258,9 @@ if($target->role == "alcoholic") {
     }
     if($condition) {
         $link = plink("new_report.php", array("target" => $target->email));
-        $page->add(new Link($link, "Report alcohol consumption"));
+        $_link = new Link($link, "Report alcohol consumption");
+        $_link->set("class","button");
+        $page->add($_link);
         $page->newline();
     }
 }

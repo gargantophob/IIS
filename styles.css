@@ -11,7 +11,7 @@ box-sizing: border-box;
 
 /* Left and right column */
 .column.side {
-    width: 10%;
+    width: 1%;
 }
 
 /* Middle column */
@@ -58,12 +58,33 @@ box-sizing: border-box;
 
 body {
     margin: 0;
-    background-color: silver;
+    background-color: #eeeeee;
 }
 
 label {
     font-weight: bold;
     float: left;
+}
+
+.button {
+    background-color: #333333;
+    border: none;
+    color: white;
+    padding: 16px 18px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 10px;
+    margin: 10px 1px;
+    cursor: pointer;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+}
+
+.button:hover {
+    color: black;
+    background-color: #b3b3b3;
 }
 
 table {
@@ -79,11 +100,11 @@ table td, table th {
 
 table tr:nth-child(even){background-color: #ffffff;}
 
-table tr:hover {background-color: #ddd;}
+table tr:hover {background-color: orange;}
 
 table td {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 16px;
+    padding-bottom: 16px;
     text-align: left;
 }
 
@@ -95,7 +116,7 @@ table a {
 }
 
 table a:hover:not(.active) {
-    color: orange;
+    color: red;
 }
 
 table th {
@@ -104,4 +125,17 @@ table th {
     text-align: left;
     background-color: navy;
     color: white;
+}
+
+input[type=text],input[type=password]  {
+    margin: 0px 16px;
+    box-sizing: border-box;
+}
+
+input[type=password]:focus {
+    background-color: lightblue;
+}
+
+input[type=text]:focus {
+    background-color: lightblue;
 }

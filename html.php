@@ -442,7 +442,7 @@ class Table extends Primitive {
         if (count($this->rows) == 1) {
             return '</br>';
         }
-        $str = '<table>';
+        $str = '<div></br></div><table>';
         $tag = 'th';
         foreach($this->rows as $row) {
             $str .= '<tr>';

@@ -56,7 +56,9 @@ function sessions_table($sessions) {
 $page = new Page();
 
 // New session link
-$page->add(new Link("places.php", "New session"));
+$link=new Link("places.php", "New session");
+$link->set("class","button");
+$page->add($link);
 $page->newline();
 $page->newline();
 
