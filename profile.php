@@ -106,6 +106,7 @@ if($target->role == "expert") {
 $page->add(new Image(plink("image.php", array("target" => $target->email))));
 $page->newline();
 $page->newline();
+$page->newline();
 
 if($source == $target) {
     // List future sessions
@@ -145,7 +146,12 @@ if($source == $target) {
             $page->add($link);
         } else {
             $page->add(new Text("Upcoming meetings:"));
-            $table = new Table(array(new Text("Name"), new Text("Date")));
+            if($source->role == "alcoholic") {
+            	$targetRole = "Patron";
+            } else {
+            	$targetRole = "Alcoholic";
+            }
+            $table = new Table(array(new Text($targetRole), new Text("Date")));
             foreach($meetings as $meeting) {
                 $meeting = Meeting::look_up($meeting);
                 if($source->role == "alcoholic") {
@@ -206,7 +212,6 @@ if($target->role == "alcoholic") {
         $table->add(array($date, $bac, $reporter));
     }
     $page->add($table);
-    $page->newline();
 }
 
 // A bunch of buttons

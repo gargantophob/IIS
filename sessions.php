@@ -44,6 +44,7 @@ function sessions_table($sessions) {
         
         $link = plink("session.php", array("session" => $session->id));
         $more_link = new Link($link, "more info...");
+        $more_link->set("class", "button");
         
         $table->add(array($date, $address, $leader_link, $more_link));
     }

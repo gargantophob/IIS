@@ -55,6 +55,7 @@ foreach(Alcohol::all() as $id) {
         "id" => $record->id
     );
     $link = new Link(plink("alcohol_selector.php", $par), "select");
+    $link->set("class", "button");
     $table->add(array($type, $origin, $link));
 }
 $page->add($table);
