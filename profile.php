@@ -127,6 +127,7 @@ if($source == $target) {
             $place = new Text(Place::look_up($session->place)->address);
             $link = plink("session.php", array("session" => $session->id));
             $link = new Link($link, "more info...");
+            $link->set("class", "button");
             $table->add(array($date, $place, $link));
         }
         $page->add($table);
