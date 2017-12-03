@@ -67,12 +67,16 @@ class Page {
             }
 
             // Everybody can see sessions and AA members, can edit profile or
-            // logout
+            // logout and see a logout timer
             $topnav->add(new Link("sessions.php", "Sessions"));
             $topnav->add(new Link("members.php", "AA members"));
             $topnav->add(new Link("signup.php", "Edit profile"));
             $link = plink("index.php", array("logout" => "yes"));
             $topnav->add(new Link($link, "Logout"));
+            
+            $element = new Text("");
+            $element->set("id", "timer");
+            $topnav->add($element);
         }
 
         return $topnav->html();
@@ -121,6 +125,28 @@ class Page {
         // End the page
         $page .= "</html>";
 
+        // Attach a script
+        $page .= '
+                <script>
+
+                // Automatic logout
+                var seconds = 900;
+                var prompt = "Atomatic logout in: ";
+                document.getElementById("timer").textContent = prompt + seconds;
+                setInterval(
+                    function() {
+                        seconds--;
+                        if(seconds == 0) {
+                            window.location.replace("index.php?logout=yes");
+                        }
+                        var timestr = Math.floor(seconds / 60) + ":" + seconds%60;
+                        document.getElementById("timer").textContent = prompt + timestr;
+                    },
+                    1000
+                );
+                </script>
+        ';
+        
         // Success
         return $page;
     }

@@ -36,6 +36,7 @@ box-sizing: border-box;
 .topnav {
     overflow: hidden;
     background-color: #333333;
+    text-align-last: right;
 }
 
 .topnav a {
@@ -52,6 +53,12 @@ box-sizing: border-box;
 
 .topnav a:hover:not(.active) {
     background-color: black;
+}
+
+.topnav span {
+    padding: 14px 20px;
+    display: block;
+    color: white;
 }
 
 /* }}} */
@@ -76,7 +83,7 @@ label {
     display: inline-block;
     font-size: 16px;
     border-radius: 10px;
-    margin: 10px 1px;
+    margin: 2px 2px;
     cursor: pointer;
     -webkit-transition-duration: 0.4s; /* Safari */
     transition-duration: 0.4s;
@@ -110,9 +117,9 @@ table td {
 
 table a {
     float: left;
-    color: black;
+    color: green;
     display: block;
-    text-decoration: none;
+    text-decoration: underlined;
 }
 
 table a:hover:not(.active) {
@@ -138,4 +145,8 @@ input[type=password]:focus {
 
 input[type=text]:focus {
     background-color: lightblue;
+}
+
+span {
+    font-size: 18px;
 }

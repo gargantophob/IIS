@@ -208,7 +208,7 @@ if($target->role == "alcoholic") {
             $reporter = Person::look_up($reporter);
             $link = plink("profile.php", array("target" => $reporter->email));
             $reporter = new Link($link, $reporter->name);
-            $reporter->set("class","button");
+            //$reporter->set("class","button");
         }
         $table->add(array($date, $bac, $reporter));
     }
@@ -275,30 +275,7 @@ if($target->role == "alcoholic") {
     }
 }
 
-// XXX
-$element = new Text("");
-$element->set("id", "timer");
-$page->add($element);
-
 // Render the page
 $page->render();
 
 ?>
-
-<script>
-
-// Automatic logout
-var seconds = 10;
-var prompt = "automatic logout after: ";
-document.getElementById("timer").textContent = prompt + seconds;
-setInterval(
-    function() {
-        seconds--;
-        if(seconds == 0) {
-            window.location.replace("index.php?logout=yes");
-        }
-        document.getElementById("timer").textContent = prompt + seconds;
-    },
-    1000
-);
-</script>
