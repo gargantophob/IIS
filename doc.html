@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+<html><head>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-2">
     <title>Projekt IIS</title>
     <style type="text/css">
     	table { border-collapse: collapse; }
@@ -10,22 +10,22 @@
 </head>
 <body>
 
-<h1>Klub AnonymnÃ­ch AlkoholikÅ¯ (Alcoholics Anonymous)</h1>
+<h1>Klub Anonymní­ch Alkoholikù (Alcoholics Anonymous)</h1>
 
 <dl>
-	<dt>AutoÅ™i</dt>
-	<dd>Roman Andriushchenko
-	    <a href="mailto:xandri03@stud.fit.vutbr.cz">xandri03@stud.fit.vutbr.cz</a> - abstraktnÃ­ databÃ¡zovÃ¡ vrstva, sprÃ¡va ÃºÄtÅ¯, evidence vypitÃ©ho alkoholu
-	</dd>
-	<dd>Jakub SemriÄ
+	<dt>Autoøi</dt>
+	<dd>Jakub Semriè
 	    <a href="mailto:xsemri00@stud.fit.vutbr.cz">xsemri00@stud.fit.vutbr.cz</a> - 
-		definice uÅ¾ivatelskÃ©ho vzhledu, sprÃ¡va sezenÃ­
+		definice u¾ivatelského vzhledu, správa míst pro sezení, správa sezení­
+	</dd>
+	<dd>Roman Andriushchenko
+	    <a href="mailto:xandri03@stud.fit.vutbr.cz">xandri03@stud.fit.vutbr.cz</a> - abstraktní­ databázová vrstva, správa ùètù, evidence vypitého alkoholu
 	</dd>
 	<dt>URL aplikace</dt>
 	<dd><a href="http://www.stud.fit.vutbr.cz/~xandri03/IIS/">http://www.stud.fit.vutbr.cz/~xandri03/IIS/</a></dd>
 </dl>
 
-<h2>UÅ¾ivatelÃ© systÃ©mu pro testovÃ¡nÃ­</h2>
+<h2>U¾ivatelé systému pro testování­</h2>
 <table>
 <tbody><tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
 <tr><td>stewart@mail.com</td><td>asdfasdf</td><td>Alkoholik</td></tr>
@@ -34,33 +34,33 @@
 </tbody></table>
 
 <h2>Implementace</h2>
-<p>DanÃ¡ aplikace vychÃ¡zÃ­ z nÃ¡vrhu v pÅ™edmÄ›tu IDS (viz. erd-ucd.pdf) s nÃ¡sledujicÃ­mi zmÄ›nami:<p>
+<p>Daná aplikace vychází­ z návrhu v pøedmìtu IDS (viz. erd-ucd.pdf) s následujicí­mi zmìnami:<p>
 <ul>
-	<li><b>UC</b>: v systÃ©mu nenÃ­ administrÃ¡tor; kaÅ¾dÃ½ mÃ¡ prÃ¡vo zaloÅ¾it/editovat/smazat ÃºÄet dle libosti</li>
-	<li><b>UC</b>: kaÅ¾dÃ½ mÃ¡ prÃ¡vo zaloÅ¾it sezenÃ­; zakladatel sezenÃ­ automaticky stÃ¡vÃ¡ vedoucÃ­m, avÅ¡ak nemusÃ­ danÃ©ho sezenÃ­ pÅ™Ã­mo zÃºÄastnit</li>
-	<li><b>ER</b>: kaÅ¾dÃ¡ osoba mÃ¡ unikÃ¡tnÃ­ identifikÃ¡tor ve tvaru emailovÃ© adresy, mÃ¡ heslo a mÅ¯Å¾e nahrÃ¡t profilovÃ½ obrÃ¡zek</li>
+	<li><b>UC</b>: v systému není­ administrátor; ka¾dı má právo zalo¾it/editovat/smazat ùèet dle libosti</li>
+	<li><b>UC</b>: ka¾dı má právo zalo¾it sezení­­; zakladatel sezení­ automaticky stává vedoucí­­m, av¹ak nemusí­­ daného sezení pøí­mo zùèastnit</li>
+	<li><b>ER</b>: ka¾dá osoba má unikátní identifikátor ve tvaru emailové adresy, má heslo a mù¾e nahrát profilovı obrázek</li>
 </ul>
-<p>danÃ© zmÄ›ny nesou pouze logickÃ½ charakter a neomezujÃ­ funkcionalitu systÃ©mu. NÃ¡sleduje popis jednotlivÃ½ch skriptÅ¯:</p>
+<p>dané zmìny nesou pouze logickı charakter a neomezují­­ funkcionalitu systému. Následuje popis jednotlivıch skriptù:</p>
 <ul>
-	<li>index.php - vstupnÃ­ strÃ¡nka pro pÅ™ihlÃ¡Å¡enÃ­</li>
-	<li>signup.php - registrace v systÃ©mu, editace/mazÃ¡nÃ­ ÃºÄtu</li>
-	<li>profile.php, members.php - informace o uÅ¾ivatelÃ­ch; realizace setkÃ¡nÃ­ mezi patrony a alkoholiky</li>
-	<li>sessions.php, session.php - sprÃ¡va sezenÃ­</li>
-	<li>places.php - sprÃ¡va mÃ­st pro sezenÃ­</li>
-	<li>new_report.php, alcohol_selector.php - evidence vypitÃ©ho alkoholu</li>
-	<li>html.php, styles.css - definice uÅ¾ivatelskÃ©ho vzhledu</li>
-	<li>database.php, entity.php - abstraktnÃ­ databÃ¡zovÃ¡ vrstva</li>
-	<li>library.php, image.php - ostatnÃ­ pomocnÃ© procedury</li>
+	<li>index.php - vstupní stránka pro pøihlá¹ení</li>
+	<li>signup.php - registrace v systému, editace/mazání­ ùètu</li>
+	<li>profile.php, members.php - informace o u¾ivatelích; realizace setkání mezi patrony a alkoholiky</li>
+	<li>sessions.php, session.php - správa sezení­</li>
+	<li>places.php - správa míst pro sezení</li>
+	<li>new_report.php, alcohol_selector.php - evidence vypitého alkoholu</li>
+	<li>html.php, styles.css - definice u¾ivatelského vzhledu</li>
+	<li>database.php, entity.php - abstraktní databázová vrstva</li>
+	<li>library.php, image.php - ostatní pomocné procedury</li>
 </ul>
 
 <h2>Instalace</h2>
 <ul>
-<li>pro instalaci staÄÃ­ rozbalit archiv (unzip xsemri00.zip)</li>
-<li>reinicializovat databÃ¡zi lze spuÅ¡tÄ›nÃ­m skriptu sql.sh</li>
-<li>testovÃ¡no a provozovÃ¡no na serveru <b>eva</b> (PHP 7.1)</li>
+<li>pro instalaci staèí­ rozbalit archiv (unzip xsemri00.zip)</li>
+<li>reinicializovat databázi lze spu¹tìní­m skriptu sql.sh</li>
+<li>testováno a provozováno na serveru <b>eva</b> (PHP 7.1)</li>
 </ul>
 
-<h2>ZnÃ¡mÃ© problÃ©my</h2>
-<p>Z ÄasovÃ½ch dÅ¯vodÅ¯ nebyl implementovÃ¡n systÃ©m pro zasÃ­lÃ¡nÃ­ pÅ™ipomÃ­nek alkoholikÅ¯m kteÅ™Ã­ se bÄ›hem poslednÃ­ch tÅ™Ã­ mÄ›sÃ­cu nezÃºÄastnili Å¾Ã¡dnÃ©ho sezenÃ­.</p>
+<h2>Známé problémy</h2>
+<p>Z èásovıch dùvodù nebyl implementován systém pro zasílání pøipomí­nek alkoholikùm kteøí se bìhem poslední­ch tøí mìsí­cù nezùèastnili ¾ádného sezení­.</p>
 
 </body></html>
