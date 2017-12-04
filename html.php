@@ -130,7 +130,7 @@ class Page {
 
                 // Automatic logout
                 var seconds = 600;
-                var prompt = "Atomatic logout in: ";
+                var prompt = "Automatic logout in: ";
                 var timestr = Math.floor(seconds / 60) + ":" + seconds%60;
                 document.getElementById("timer").textContent = prompt + timestr;
                 setInterval(
