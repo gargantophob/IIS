@@ -1,7 +1,11 @@
-/* layout stuff
-{{{*/
+/*
+ * @file styles.css
+ * Layout stuff.
+ * @author xsemri00
+ */
+/*{{{*/
 * {
-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .column {

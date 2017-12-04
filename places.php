@@ -8,7 +8,7 @@
  * [G] address  - new place address
  * Authorized access.
  * 
- * @author xandri03
+ * @author xsemri00
  */
  
 require_once "library.php";

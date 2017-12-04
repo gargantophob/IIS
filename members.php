@@ -8,6 +8,7 @@
  * [G] type - one of {all, alcoholics, patrons, experts}
  * Authorized access.
  * 
+ * @author xsemri00
  * @author xandri03
  */
 

@@ -8,7 +8,8 @@
  * [G] regime   - one of {meeting, session}
  * [G] target   - either person to meet or a place to held session
  * Authorized access.
- * 
+ *
+ * @author xsemri00
  * @author xandri03
  */
  

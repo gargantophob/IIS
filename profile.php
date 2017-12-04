@@ -7,7 +7,8 @@
  * Protocol:
  * [G] target   - target page email
  * Authorized access.
- *
+ * 
+ * @author xsemri00
  * @author xandri03
  */
 

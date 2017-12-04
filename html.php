@@ -3,7 +3,6 @@
 /**
  * @file html.php
  * HTML generator.
- * @author xandri03
  * @author xsemri00
  */
 
